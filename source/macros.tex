@@ -220,6 +220,55 @@
 \newenvironment{note}[1][Note]{\noteintro{#1}}{\noteoutro{note}\xspace}
 \newenvironment{example}[1][Example]{\noteintro{#1}}{\noteoutro{example}\xspace}
 
+%%%%%%%%%%%%%%%% BEGIN FV Annotation Macros %%%%%%%%%%%%%%%%%%%%%%%%
+
+\definecolor{orange}{rgb}{0.9,0.4,0}
+\definecolor{indigo}{rgb}{0,0.4,1}
+\definecolor{darkpurple}{rgb}{0.4,0,1}
+
+\newcounter{fvnum} %every annotation is given a number
+
+%every annotation has an id.
+\newcommand{\fvid}{\tiny{\ensuremath{^{.fv\arabic{fvnum}}}}}
+% Do not embed the stepcounter, since it leads to erroneous calculations.
+%\newcommand{\fvid}{\stepcounter{fvnum}.fv\arabic{fvnum}}
+
+\newcommand{\notefv}[1]{\stepcounter{fvnum}\color{blue}{[\,\textit{Note:}\, #1 \textit{\,---\,end note\fvid}\,]\xspace}\color{black}}
+
+\newenvironment{fvnote}{\stepcounter{fvnum}\color{blue} [\,\textit{Note:}\,}{\textit{\,---\,end note\fvid}\,]\xspace\color{black}}
+
+
+\newcommand{\errorfv}[1]{\stepcounter{fvnum}\color{red}{[\,\textit{Error:}\, #1 \textit{\,---\,end error\fvid}\,]\xspace}\color{black}}
+
+\newcommand{\marginfv}[1]{\stepcounter{fvnum}\sidepar{\smaller\color{blue}[\,\textit{Note:}\xspace #1 \textit{\,---\,end margin\fvid}\,]\xspace\color{black}}}
+
+
+
+%\newcommand{\addfv}[1]{\stepcounter{fvnum}\color{darkpurple}#1\fvid\color{black}}
+
+%highlight and mark fv
+%NOTE: You must wrap \ref{#1}, \cite in \mbox if it gives you an error of an extra }
+%Note - to avoid having to wrap ref/cite and pageref in \mbox we use this hack as shown in http://tex.stackexchange.com/questions/139463/how-to-make-hl-highlighting-to-automatically-place-incompatible-commands-in
+ 
+\soulregister\cite7
+\soulregister\ref7
+\soulregister\pageref7
+
+\newcommand{\fv}[1]{\stepcounter{fvnum}\hl{#1\fvid}}
+\newcommand{\fvins}[1]{{\color{orange}#1\fvid}\xspace }
+\newcommand{\hlfv}[1]{\stepcounter{fvnum}\hl{#1 \fvid}}
+
+\newcommand{\enterexamplefv} {\color{darkpurple}[\,\textit{Example:}\xspace}
+\newcommand{\exitexamplefv}{\stepcounter{fvnum}\textit{\,---\,end example\fvid}\,]\xspace\color{black}}
+
+\newenvironment{fvexample}{\color{darkpurple}[\,\textit{Example:}\xspace}{\stepcounter{fvnum}\textit{\,---\,end example\fvid}\,]\xspace\color{black}}
+
+\newcommand{\paperfv}[1]{\href{http://wg21.link/#1}{#1}}
+\newcommand{\cwgfv}[1]{\href{http://wg21.link/cwg#1}{cwg#1}}
+
+
+%%%%%%%%%%%%%%%% END FV Annotation Macros %%%%%%%%%%%%%%%%%%%%%%%%
+
 %% Library function descriptions
 \newcommand{\Fundescx}[1]{\textit{#1}\xspace}
 \newcommand{\Fundesc}[1]{\Fundescx{#1:}}

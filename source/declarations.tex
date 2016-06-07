@@ -720,7 +720,51 @@ see~\ref{class.friend}.
 The \tcode{constexpr} specifier shall be applied only to the definition of
 a variable or variable template or
 the declaration of a
-function or function template.
+function or function template. \begin{fvnote} 
+As to why constexpr is not optional on function definitions see this thread:
+\href{http://lists.isocpp.org/core/2016/07/0737.php}{cwg-discussion0737}
+\begin{codeblock} 
+I believe the arguments for making 'constexpr' optional are:
+- 'constexpr' on a function definition might imply that a function
+is usable in a constant-expression - but that's not true - so it can
+be confusing.
+- we can get excellent diagnostics for why a function is not usable
+in a constant-expression when used, so let's just rely on that.
+- we open more functions/algorithsm up to constant-expression
+evaluation - regardless of whether authors are seasoned enough to
+think about whether their functions should be marked constexpr.
+- library folks can just document that their functions are supposed
+to be usable in a constant expression (perhaps through an attribute -
+which wouldn't affect semantics)
+- we can reduce pseudo-checking functions for 'constexpr-ness',
+assuming folks don't use it on every function that they think might be
+usable in a constant expression.
+- what else?
+
+Arguments against making it optional are:
+- we signify the intent (contract) that the function was designed to
+be usable in a constant expression (but this could be done through
+documentation/attributes?) and so use in a constant-expression is
+future-proof?
+- we might trigger more template instantiations for templates that
+don't even meet the minimal requirements.
+- what else?
+
+> If the authors did not intend for the function to be usable in a constant
+> expression (but it happens to be usable currently), users may come to depend
+> (or accidentally depend) on the usability of the function in constant
+> expressions. I can just imagine someone screaming bloody murder because the
+> initialization of their non-locals gets "broken" when some random function
+> is refactored so that it calls something from a separately-compiled library.
+>
+
+Agreed - this is a compelling risk. Not sure how prevalent it truly
+would be, but I admit it doesn't seem that unusual.  I suppose this
+concern in itself is enough to kill any thoughts of making 'constexpr'
+optional on a function?
+
+\end{codeblock}
+\end{fvnote}
 A function or static data member declared with the \tcode{constexpr}
 specifier is implicitly an inline function or variable\iref{dcl.inline}.
 If any declaration of a function or function template has
@@ -3076,6 +3120,61 @@ int f(D* d) {
 \end{codeblock}
 \end{example}
 \end{note}
+
+\marginfv{The 'naming class' is defined in \ref{class.access.base}/5. It is where name lookup starts.  The naming class is explicit in a qualified-id such as  in \tcode{d->A::x()} it is \tcode{'A'} or implicit when it refers to the type of the object expression such as in \tcode{d->x()} it is \tcode{'D'}.   The other piece to this is that in \tcode{E1.E2} there are two conditions that must hold:
+	\begin{enumerate}
+		\item The declaring class of the member (i.e the class of which it is directly a member) must be unambiguously convertible to the naming class of E2 \ref{expr.ref}/5
+		\item The class of the object expression must be implicitly \ref{conv.ptr}/3 convertible (i.e unambiguously) to the type of the naming class \ref{class.access.base}/6. 
+	\end{enumerate}
+}
+
+
+
+\begin{fvexample}
+\begin{codeblock}
+struct A { int x(); int y(); int z(); };
+struct A1 : A { int y(); int z(); };
+struct B : A, A1 { using A1::z; };
+struct C : A {
+  using A::x;
+  int x(int);
+};
+
+struct D : B, C {
+  using C::x;
+  int x(double);
+};
+
+void f(D* d) {
+  // Below, the 'naming-class' refers to the class in which lookup for \tcode{x} begins, 
+  // the 'declaring-class' is the class that has the selected \tcode{x} as its direct member
+  // (i.e ignoring using-declarations), and the 'object-class' is the class of the 
+  // object expression.
+	
+  d->x();       // ambiguous: declaring-class \tcode{A} is an ambiguous base of the implicit
+                // naming-class \tcode{D}
+  d->A::x();    // ambiguous: naming-class \tcode{A} is an ambiguous base of the object-class \tcode{D}
+  d->C::A::x(); // ambiguous: same reason as line directly above (naming-class is still \tcode{A})
+  d->C::x();    // OK: declaring-class \tcode{A} is an unambiguous base of the naming-class
+                // \tcode{C}, which is an unambigous base of the object-class \tcode{D}            
+  d->C::x(3);   // OK: naming-class and declaring-class \tcode{C} is an umambiguous base of
+                // the object-class \tcode{D}  
+  d->B::x();    // ambiguous: declaring-class \tcode{A} is an ambiguous base of the naming-class \tcode{B}
+  d->A1::x();   // OK: declaring-class \tcode{A} is an unambiguous base of the naming-class
+                // \tcode{A1} which is an unambiguous base of the object-class \tcode{D}
+  d->B::y();    // ambiguous: member lookup ambiguity when merging lookup sets of 
+                // \tcode{B}'s direct base subobjects 
+  d->B::z();    // OK: using-declaration resolves member lookup ambiguity in favor of
+                // \tcode{A1::z} which hides \tcode{A::z} (same signature); and, 
+                // declaring-class \tcode{A1} is an unambiguous base of naming-class \tcode{B} 
+                // which is an unambiguous base of object-class \tcode{D}
+  d->z();       // ambiguous: member name lookup ambiguity when merging lookup 
+                // sets from \tcode{B} and \tcode{C} subobjects
+}
+
+\end{codeblock}
+\end{fvexample}
+
 
 \pnum
 A synonym created by a \grammarterm{using-declaration} has the usual

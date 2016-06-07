@@ -4,8 +4,10 @@
 %%--------------------------------------------------
 %%  set page size, type block size, type block position
 
-\setlrmarginsandblock{2.245cm}{2.245cm}{*}
-\setulmarginsandblock{2.5cm}{2.5cm}{*}
+\setstocksize{11in}{12.5in}
+\settrimmedsize{11in}{12.5in}{*}
+\setlrmarginsandblock{1in}{4in}{*}
+\setulmarginsandblock{1in}{*}{1.618}
 
 %%--------------------------------------------------
 %%  set header and footer positions and sizes
@@ -15,9 +17,10 @@
 
 %%--------------------------------------------------
 %%  make miscellaneous adjustments, then finish the layout
-\setmarginnotes{7pt}{7pt}{0pt}
+% \setmarginnotes{7pt}{7pt}{0pt}
+\setmarginnotes{0.1\foremargin}{0.7\foremargin}{\onelineskip}
+\sideparmargin{outer}
 \checkandfixthelayout
-
 %%--------------------------------------------------
 %% If there is insufficient stretchable vertical space on a page,
 %% TeX will not properly consider penalties for a good page break,

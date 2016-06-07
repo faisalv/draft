@@ -25,6 +25,8 @@
 \usepackage{mathrsfs}     % mathscr font
 \usepackage[final]{microtype}
 \usepackage{multicol}
+\usepackage{marginnote}
+\usepackage{soul}
 \usepackage{xspace}
 \usepackage{lmodern}
 \usepackage[T1]{fontenc}
@@ -97,6 +99,20 @@
 %% main body of the document
 \mainmatter
 \setglobalstyles
+
+%%%%%%%%% Begin FV Debug Region to compile specific sections.
+%% Comment out \end{document} and the section you want to compile
+%\include{intro}
+%\include{basic}
+%\include{expressions}
+%\include{declarations}
+%\include{derived}
+%\include{special}
+%\include{declarators}
+
+%\end{document}
+
+%%%%%%%%% End FV Debug Region to compile specific sections.
 
 \include{intro}
 \include{lex}

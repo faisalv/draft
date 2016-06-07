@@ -547,7 +547,7 @@ has the form
 \terminal{*} attribute-specifier-seq\opt cv-qualifier-seq\opt{} \terminal{D1}
 \end{ncsimplebnf}
 
-and the type of the identifier in the declaration
+and \fvins{assuming} the type of the identifier in the declaration
 \tcode{T}
 \tcode{D1}
 is ``\placeholder{derived-declarator-type-list}
@@ -558,6 +558,65 @@ is ``\placeholder{derived-declarator-type-list} \grammarterm{cv-qualifier-seq} p
 \tcode{T}''.
 \indextext{declaration!pointer}%
 \indextext{declaration!constant pointer}%
+\begin{fvnote}
+  \textit{derived-declarator-type-list} is the assumed known variable that is used to recursively determine the description of a type through syntactic pattern-matching, decomposition and recomposition. In spite of the italics it is NOT a grammar term. It is used as follows: Say one wants to determine the full type of a variable declared with a complicated combination of declarator-operators (i.e. *, \&, (), []), then assuming that we know how the inner declarators have affected the type (since we start calculation using the inner most declarator-operators, i.e. those closest to the identifier) --- i.e. assume the resulting type using \tcode{'N'} inner declarators is {\color{addclr}{'\textit{derived-declarator-type-list} \tcode{T}'}}, then using the current declarator ('*') we can determine that the current type (i.e. then for \tcode{'N+1'} is {\color{addclr}'\textit{derived-declarator-type-list} {\color{orange} pointer to} \tcode{T}'}).  \term{derived-declarator-type-list} consists of some valid concatenated sequence of the following phrases [that ends with \tcode{T}]: \begin{enumerate}
+  	\setlength\itemsep{0mm}
+  	\item \textit{cv-qualifier-seq} pointer to
+  	\item \textit{cv-qualifier-seq} reference to
+  	\item \textit{cv-qualifier-seq} pointer to member of class nested-name-specifier of type
+  	\item array of \tcode{N} \textit{cv-qualifier-seq}
+  	\item array of unknown bound of
+  	\item \tcode{noexcept}\opt function of (\grammarterm{parameter-declaration-clause} )
+  	\grammarterm{cv-qualifier-seq\opt} \grammarterm{ref-qualifier\opt} returning'
+  \end{enumerate}
+  	For e.g. \begin{codeblock}
+  	const int *const  *volatile &I
+  	// 1) start with first decomposing the declaration of \tcode{I} into \tcode{'T D'} where:
+  	// \xspace\xspace\xspace   --- \tcode{T = 'const int'} and \tcode{D = '*const *volatile \&I'}
+  	// \xspace\xspace\xspace   --- since \tcode{D} has the above form: \tcode{'* cv D1'} where \tcode{'D1 = *volatile \&R1'} [Replacing \tcode{'I'} with \tcode{'R1'} to track recursion]
+  	// \xspace\xspace\xspace   --- lets call the full type of the identifier \tcode{R1} in the intermediate hypothetical declaration \tcode{T D1} 
+  	// \xspace\xspace\xspace\xspace\xspace\xspace  (i.e. \tcode{'const int *volatile \&R1'}) as \tcode{U1} then \tcode{U1} can be decomposed into \tcode{X1} \tcode{T} (\tcode{X1} is the 'derived-declarator-type-list')
+  	// \xspace\xspace\xspace   --- the type of \tcode{I} is \tcode{'X1} const pointer to \tcode{T'}, so now recurse to determine \tcode{'X1'} since we know \tcode{T = 'const int'}
+  	// \xspace\xspace\xspace   --- [NOTE: from last bullet in step 2 below, our recursive step returns \tcode{X1} = 'reference to volatile pointer to', 
+  	// \xspace\xspace\xspace\xspace\xspace\xspace so plug it in above]
+  	// \xspace\xspace\xspace   --- therefore, the type of \tcode{I} is = 'reference to volatile pointer to const pointer to \tcode{T}' and since \tcode{T} = \tcode{const int}, 
+  	// \xspace\xspace\xspace\xspace\xspace\xspace therefore the type of \tcode{I} = 'reference to volatile pointer to const pointer to \tcode{const int}'
+  	
+  	
+  	// 2) To determine \tcode{X1}, we need to determine \tcode{U1} (i.e. \tcode{X1 T}) which is the full type of \tcode{R1} (\tcode{T D1}: \tcode{const int *volatile \&R1})
+  	// \xspace\xspace\xspace   --- so now \tcode{T = 'const int'} and the new \tcode{D = '*volatile \&R1'}
+  	// \xspace\xspace\xspace   ---  since \tcode{D} has the above form: \tcode{'* cv D2'} where \tcode{'D2 = \&R2'} [Replacing \tcode{'R1'} with \tcode{'R2'} to track recursion]
+  	// \xspace\xspace\xspace --- lets call the full type of the identifier \tcode{R2} in the intermediate hypothetical declaration \tcode{T D2} 
+  	// \xspace\xspace\xspace\xspace\xspace\xspace (i.e. \tcode{const int \&R2}) as \tcode{U2} then \tcode{U2} can be decomposed into \tcode{X2} \tcode{T} (\tcode{X2} is the 'derived-declarator-type-list')
+  	// \xspace\xspace\xspace   --- the type of \tcode{R1} is \tcode{'X2} volatile pointer to \tcode{T'}, so now recurse to determine \tcode{'X2'} since we know \tcode{T = 'const int'}
+  	// \xspace\xspace\xspace   --- [NOTE: from last bullet in step 3 below, our recursive step returns \tcode{X2} = 'reference to', so plug it back in above]
+  	// \xspace\xspace\xspace   --- therefore, \tcode{U1} = 'reference to volatile pointer to \tcode{T}' and since \tcode{U1} = \tcode{X1 T}, 
+  	// \xspace\xspace\xspace\xspace\xspace\xspace therefore \tcode{X1} = 'reference to volatile pointer to'
+  	
+  	// 3) To determine \tcode{X2}, we need to determine \tcode{U2} (i.e. \tcode{X2 T}) which is the full type of \tcode{R2} (\tcode{T D2}: \tcode{const int \&R2})
+  	// \xspace\xspace\xspace   --- so now \tcode{T = 'const int'} and the new \tcode{D = '\&R1'}
+  	// \xspace\xspace\xspace   --- since \tcode{D} has the form: \tcode{'\& cv D3'} where \tcode{'D3 = R3'} [Replacing \tcode{'R2'} with \tcode{'R3'} to track recursion]
+  	// \xspace\xspace\xspace --- lets call the full type of the identifier \tcode{R3} in the intermediate hypothetical declaration \tcode{T D3} (i.e. \tcode{const int R3})
+  	// \xspace\xspace\xspace\xspace\xspace\xspace as \tcode{U3} then \tcode{U3} can be decomposed into \tcode{X3} \tcode{T} (\tcode{X3} is the 'derived-declarator-type-list') and in this case \tcode{X3} is empty.
+  	// \xspace\xspace\xspace   --- the type of \tcode{R2} is \tcode{'X3} reference to \tcode{T'}, and since \tcode{X3} is empty, the type is 'reference to \tcode{T}'
+  	// \xspace\xspace\xspace   --- therefore, \tcode{U2} = 'reference to \tcode{T}' and since \tcode{U2} = \tcode{X2 T}, therefore \tcode{X2} = 'reference to'
+  \end{codeblock}
+\end{fvnote}
+\marginfv{In regards to: 'derived-declarator-type-list' \newline\newline
+	\href{https://groups.google.com/d/topic/comp.std.c/gIEwLcEhCHE/discussion}{1990 Doug Gwyn} "The examples in
+	questions all runs something like this:  "If, in the declaration "T D1",
+	D1 has the form ...[some well-defined syntactic construct involving d]...,
+	and the type specified for "ident" in the declaration "T D" is "derived-
+	declarator-type-list T", then the type specified for "ident" is ... [some
+	type description involving "derived-declarator-type-list" and "T"]".  This
+	is nothing more than the introduction of a bound variable "derived-
+	declarator-type-list" used in the same manner as the bound variable "T".
+	We could have used "X" instead of "derived-declarator-type-list".  There
+	is no need to provide a grammatical specification of the phrase, any more
+	than there is a need to describe the phrase "T" in the grammar." \newline \newline
+	\href{http://stackoverflow.com/questions/13808932/what-are-declarations-and-declarators-and-how-are-their-types-interpreted-by-the}{1) Must Read stack-overflow}\newline
+	\href{http://stackoverflow.com/questions/13779273/in-the-standard-what-is-derived-declarator-type}{2) Optional stackoverflow-discussion}
+	}
 The
 \grammarterm{cv-qualifier}{s}
 apply to the pointer and not to the object pointed to.

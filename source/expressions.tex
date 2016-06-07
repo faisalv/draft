@@ -5717,14 +5717,36 @@ has three arguments, the second of which has the value
 
 \pnum
 Certain contexts require expressions that satisfy additional
-requirements as detailed in this subclause; other contexts have different
+requirements as detailed in this subclause 
+
+\marginfv{
+  Certain 'grammar productions' require \grammarterm{constant-expressions}: \newline%
+  \mbox{ \xspace\xspace 1. \grammarterm{noptr-new-declarator [ constant-expression ]}}\newline%
+  \mbox{ \xspace\xspace\xspace\xspace ----- e.g.  \tcode{new int[n][10]}}\newline%
+  \mbox{ \xspace\xspace 2. \tcode{case} \grammarterm{constant-expression} : }\newline%
+  \mbox{ \xspace\xspace 3. \tcode{static_assert} ( \grammarterm{constant-expression} ) ; }\newline%
+  \mbox{ \xspace\xspace 4. \tcode{static_assert} ( \grammarterm{constant-expression, string-literal} ) ; }\newline%
+  \mbox{ \xspace\xspace 5. \grammarterm{enumerator = constant-expression} }\newline%
+  \mbox{ \xspace\xspace 6. \tcode{alignas}(\grammarterm{constant-expression ...opt}) }\newline%
+  \mbox{ \xspace\xspace 7. \grammarterm{noptr-declarator [ constant-expressionopt ]}}\newline%
+  \mbox{ \xspace\xspace\xspace\xspace ----- e.g.  \tcode{int arr[10]}}\newline%  
+  \mbox{ \xspace\xspace\xspace\xspace ----- e.g.  \tcode{void f(int (*)[10])}}\newline%  
+  \mbox{ \xspace\xspace 8. bit field => \grammarterm{identifier opt : constant-expression}}\newline%
+  \mbox{ \xspace\xspace\xspace\xspace ----- e.g.  \tcode{struct \{ int : 10; \};}}\newline%  
+  \mbox{ \xspace\xspace 9. \grammarterm{template-argument: constant-expression }}\newline%
+  \mbox{ \xspace\xspace\xspace\xspace ----- e.g.  \tcode{array<10> a;}}\newline%  
+  \mbox{ \xspace\xspace 10. \tcode{noexcept} ( \grammarterm{constant-expression} ) }\newline%
+}
+
+; other contexts have different
 semantics depending on whether or not an expression satisfies these requirements.
 Expressions that satisfy these requirements,
-assuming that copy elision is performed,
-are called
+assuming that copy elision is performed \notefv{Copy elision is manadatory for constant expressions \cwgfv{2022}},
+are called 
 \indexdefn{expression!constant}%
 \defnx{constant expressions}{constant expression}. \begin{note} Constant expressions can be evaluated
 during translation.\end{note}
+\begin{fvnote} The reasons for resistance to clearly stating that constant expression evaluation occurs during  translation phase 7 and 8 is somewhat described in the following thread \href{http://lists.isocpp.org/core/2016/07/0741.php}{cwg-discussion-741}\end{fvnote}
 
 \begin{bnf}
 \nontermdef{constant-expression}\br
@@ -5826,6 +5848,18 @@ unless the reference has a preceding initialization and either
   \item
   its lifetime began within the evaluation of \tcode{e};
 \end{itemize}
+
+\begin{fvnote}
+\begin{codeblock}
+  struct X { constexpr int f() const { return 0; } };
+  constexpr int foo(const X& r) { r; return r.f(); }
+  int main() {
+    X x;
+	constexpr int I = foo(x);
+  }
+\end{codeblock}
+In the above code, in the evaluation of the id-expression \tcode{'r'} which refers to a variable (a parameter is a variable) of reference type, \tcode{r's} lifetime begins within the	evaluation of \tcode{'e'} - and so the above is OK in a constant expression.
+\end{fvnote}
 
 \item
 in a \grammarterm{lambda-expression},

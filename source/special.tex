@@ -483,6 +483,20 @@ to perform a copy or move of the object).
 \begin{note}
 This latitude is granted to allow objects of class type to be passed to or returned from functions in registers.
 \end{note}
+\begin{fvnote} 
+\href{http://lists.isocpp.org/core/2016/07/0772.php}{See discussion by Jeffrey and Richard reflector-cwg-772:}	
+It's this copy that the ABI requires be performed today, and that the standard disallows if the type contains a volatile member. Example:%
+\begin{codeblock}
+
+struct X { X *volatile p = this; };
+void f(X x) { assert(x.p == &x); }
+void g() { f({}); }
+\end{codeblock} %
+If X has a trivial copy or move constructor, a technical copy may be performed as part of the call to f(X), and the assert may fail. Otherwise, the assert must not fail, because the object constructed in g() is the same object as f's parameter.
+\newline \newline 
+Current ABIs, such as the x86_64 ABI, pass X in registers.
+\cwgfv{496} \cwgfv{2094}
+\end{fvnote}
 
 \pnum
 \indextext{temporary!constructor for}%
