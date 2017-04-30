@@ -20,15 +20,39 @@ The first token in the sequence is a
  \underline{Macro Replacement Process Sketch}\newline
  \begin{itemize}
  	\item When scanning/lexing, if an identifier that has been defined as a macro is found, it is replaced with its replacement-list (phase 4)
- 	\item For function like macros, the arguments are first expanded prior to substitution within the replacement list (unless the argument has either \tcode{\#} or \tcode{\#\#} applied to it.)
- 	\item Macro arguments are optional, but the commas for non-ellipsis parameters are not optional i.e\newline%
- 	\newline%
- 	\tcode{\#define X(a,b) \#a,\#b\newline%
- 	\mbox{ \xspace\xspace X(,) ==> "",""}\newline%
- 	\mbox{ \xspace\xspace X() ==> ERROR!}\newline
- 	\mbox{ \xspace\xspace X(u,) ==> "u",""}\newline
- 	\mbox{ \xspace\xspace X(,v) ==> "","v"}\newline}
- 	\item Each Macro has two flags associated with it DISABLED, IS_FUNCTION
+ 	\item Argument Expansion for function like macros: the arguments are first expanded prior to substitution within the replacement list (unless the argument has either \tcode{\#} or \tcode{\#\#} applied to it.).  
+ 	\begin{itemize}
+ 		\item A macro-id for a function-like macro is not disabled until after argument expansion so for e.g. this is OK (note: \tcode{x,y} do not form two arguments for outer invocation of \tcode{A}):\newline
+ 		\newline
+ 		\tcode{\#define A(x,y) x,y\newline
+ 			\mbox{ \xspace\xspace A(A(1,2),3) ==> 1,2,3}\newline
+ 		}
+ 		\item if during argument expansion a macro-id is recursively expanded it is disabled, then when examined in the context of the replacement list it is still not expanded. Note, since A is disabled in the invocation of B, it is legal to end up with A() since the preprocessor won't try to macro-expand it\newline
+ 		\newline
+ 		\tcode{\#define A(x,y) A\newline
+ 			\#define B(b) b\newline
+ 			\mbox{ \xspace\xspace A() ==> ERROR!}\newline
+ 			\mbox{ \xspace\xspace B(A(1,2))() ==> A()}
+ 		}
+ 	\end{itemize}
+ 	\item Macro arguments are optional (replaced by 'placemarker' tokens), but the commas for non-ellipsis parameters are not optional i.e\newline
+ 		\newline
+ 		\tcode{\#define X(a,b) \#a,\#b\newline
+ 		\mbox{ \xspace\xspace X(,) ==> "",""}\newline
+ 		\mbox{ \xspace\xspace X() ==> ERROR!}\newline
+ 		\mbox{ \xspace\xspace X(u,) ==> "u",""}\newline
+ 		\mbox{ \xspace\xspace X(,v) ==> "","v"}\newline}
+ 	\item When a macro is replaced, the context of that macro is popped off (since function-like macros are not invoked until the left-paren which is seen following context-pop-off, NO recursively disabled macros below ):\newline
+ 	\newline
+ 		\tcode{\#define A(x) a x\newline
+ 			   \#define B(x) b x\newline
+ 			   \mbox{\xspace\xspace A(B)(A)(B)(abc) ==> a b a b abc}
+ 			   \newline\newline
+ 			   \#define A2(x) x <a2> A1\newline
+ 			   \#define A1(x) x <a1> A2\newline
+ 			   \mbox{\xspace\xspace A1(2)(3)(4) ==> 2 <a1> 3 <a2> 4 <a1> A2}
+ 			   \mbox{\xspace\xspace A2(2)(3)(4) ==> 2 <a2> 3 <a1> 4 <a2> A1}
+ 			}
  \end{itemize}
 }
 preprocessing token that (at the start of translation phase 4)
@@ -553,7 +577,7 @@ preprocessing token is \impldef{search locations for \tcode{""""} header}.
 	\newline%
 	which fully expands to \tcode{bar foo (2)}. During pre-expansion of the argument, \tcode{foo} does not expand even though the macro is enabled, since it has no following parenthesis [pre-expansion of an argument only uses tokens from that argument; it cannot take tokens from whatever follows the macro invocation]. This still leaves the argument token \tcode{foo} eligible for future expansion. Then, when re-scanning after argument replacement, the token \tcode{foo} is rejected for expansion, and marked ineligible for future expansion, since the macro is now disabled. It is disabled because the replacement list \tcode{bar foo} of the macro is still on the context stack.\newline%
 	\newline%
-	If instead the algorithm looked for an opening parenthesis first and then tested whether the macro were disabled it would be subtly wrong. In the example above, the replacement list of ‘foo’ would be popped in the process of finding the parenthesis, re-enabling ‘foo’ and expanding it a second time. }
+	If instead the algorithm looked for an opening parenthesis first and then tested whether the macro were disabled it would be subtly wrong. In the example above, the replacement list of 'foo' would be popped in the process of finding the parenthesis, re-enabling 'foo' and expanding it a second time. }
 
 
 \pnum
