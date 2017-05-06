@@ -3121,7 +3121,7 @@ int f(D* d) {
 \end{example}
 \end{note}
 
-\marginfv{The 'naming class' is defined in \ref{class.access.base}/5. It is where name lookup starts.  The naming class is explicit in a qualified-id such as  in \tcode{d->A::x()} it is \tcode{'A'} or implicit when it refers to the type of the object expression such as in \tcode{d->x()} it is \tcode{'D'}.   The other piece to this is that in \tcode{E1.E2} there are two conditions that must hold:
+\fvmargin{The 'naming class' is defined in \ref{class.access.base}/5. It is where name lookup starts.  The naming class is explicit in a qualified-id such as  in \tcode{d->A::x()} it is \tcode{'A'} or implicit when it refers to the type of the object expression such as in \tcode{d->x()} it is \tcode{'D'}.   The other piece to this is that in \tcode{E1.E2} there are two conditions that must hold:
 	\begin{enumerate}
 		\item The declaring class of the member (i.e the class of which it is directly a member) must be unambiguously convertible to the naming class of E2 \ref{expr.ref}/5
 		\item The class of the object expression must be implicitly \ref{conv.ptr}/3 convertible (i.e unambiguously) to the type of the naming class \ref{class.access.base}/6. 

@@ -233,14 +233,14 @@
 % Do not embed the stepcounter, since it leads to erroneous calculations.
 %\newcommand{\fvid}{\stepcounter{fvnum}.fv\arabic{fvnum}}
 
-\newcommand{\notefv}[1]{\stepcounter{fvnum}\color{blue}{[\,\textit{Note:}\, #1 \textit{\,---\,end note\fvid}\,]\xspace}\color{black}}
+%\newcommand{\notefv}[1]{\stepcounter{fvnum}\color{blue}{[\,\textit{Note:}\, #1 \textit{\,---\,end note\fvid}\,]\xspace}\color{black}}
 
 \newenvironment{fvnote}{\stepcounter{fvnum}\color{blue} [\,\textit{Note:}\,}{\textit{\,---\,end note\fvid}\,]\xspace\color{black}}
 
 
-\newcommand{\errorfv}[1]{\stepcounter{fvnum}\color{red}{[\,\textit{Error:}\, #1 \textit{\,---\,end error\fvid}\,]\xspace}\color{black}}
+\newcommand{\fverror}[1]{\stepcounter{fvnum}\color{red}{[\,\textit{Error:}\, #1 \textit{\,---\,end error\fvid}\,]\xspace}\color{black}}
 
-\newcommand{\marginfv}[1]{\stepcounter{fvnum}\sidepar{\smaller\color{blue}[\,\textit{Note:}\xspace #1 \textit{\,---\,end margin\fvid}\,]\xspace\color{black}}}
+\newcommand{\fvmargin}[1]{\stepcounter{fvnum}\sidepar{\smaller\color{blue}[\,\textit{Note:}\xspace #1 \textit{\,---\,end margin\fvid}\,]\xspace\color{black}}}
 
 
 
@@ -256,15 +256,15 @@
 
 \newcommand{\fv}[1]{\stepcounter{fvnum}\hl{#1\fvid}}
 \newcommand{\fvins}[1]{{\color{orange}#1\fvid}\xspace }
-\newcommand{\hlfv}[1]{\stepcounter{fvnum}\hl{#1 \fvid}}
+\newcommand{\fvhl}[1]{\stepcounter{fvnum}\hl{#1 \fvid}}
 
-\newcommand{\enterexamplefv} {\color{darkpurple}[\,\textit{Example:}\xspace}
-\newcommand{\exitexamplefv}{\stepcounter{fvnum}\textit{\,---\,end example\fvid}\,]\xspace\color{black}}
+\newcommand{\fventerexample} {\color{darkpurple}[\,\textit{Example:}\xspace}
+\newcommand{\fvexitexample}{\stepcounter{fvnum}\textit{\,---\,end example\fvid}\,]\xspace\color{black}}
 
 \newenvironment{fvexample}{\color{darkpurple}[\,\textit{Example:}\xspace}{\stepcounter{fvnum}\textit{\,---\,end example\fvid}\,]\xspace\color{black}}
 
-\newcommand{\paperfv}[1]{\href{http://wg21.link/#1}{#1}}
-\newcommand{\cwgfv}[1]{\href{http://wg21.link/cwg#1}{cwg#1}}
+\newcommand{\fvpaper}[1]{\href{http://wg21.link/#1}{#1}}
+\newcommand{\fvcwg}[1]{\href{http://wg21.link/cwg#1}{cwg#1}}
 
 
 %%%%%%%%%%%%%%%% END FV Annotation Macros %%%%%%%%%%%%%%%%%%%%%%%%

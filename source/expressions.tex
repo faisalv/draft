@@ -5719,7 +5719,7 @@ has three arguments, the second of which has the value
 Certain contexts require expressions that satisfy additional
 requirements as detailed in this subclause 
 
-\marginfv{
+\fvmargin{
   Certain 'grammar productions' require \grammarterm{constant-expressions}: \newline%
   \mbox{ \xspace\xspace 1. \grammarterm{noptr-new-declarator [ constant-expression ]}}\newline%
   \mbox{ \xspace\xspace\xspace\xspace ----- e.g.  \tcode{new int[n][10]}}\newline%
@@ -5741,7 +5741,7 @@ requirements as detailed in this subclause
 ; other contexts have different
 semantics depending on whether or not an expression satisfies these requirements.
 Expressions that satisfy these requirements,
-assuming that copy elision is performed \notefv{Copy elision is manadatory for constant expressions \cwgfv{2022}},
+assuming that copy elision is performed \fvnote{Copy elision is manadatory for constant expressions \fvcwg{2022}},
 are called 
 \indexdefn{expression!constant}%
 \defnx{constant expressions}{constant expression}. \begin{note} Constant expressions can be evaluated

@@ -13,7 +13,7 @@ A \defn{preprocessing directive} consists of a sequence of preprocessing tokens
 that satisfies the following constraints:
 The first token in the sequence is a
 \tcode{\#}
-\marginfv{
+\fvmargin{
 	\href{https://gcc.gnu.org/onlinedocs/gcc-6.3.0/cpp/}{GCC Preprocessor Manual}\newline
  Preprocessing directives are lines in your program that start with '\tcode{\#}'. Whitespace is allowed before and after the '\tcode{\#}'. \newline
  \newline
@@ -566,7 +566,7 @@ preprocessing token pair or a pair of
 \tcode{"}
 characters is combined into a single header name
 preprocessing token is \impldef{search locations for \tcode{""""} header}.
-\marginfv{The C standard states that, after any parameters have been replaced with their possibly-expanded arguments, the replacement list is scanned for nested macros. Further, any identifiers in the replacement list that are not expanded during this scan are never again eligible for expansion in the future, if the reason they were not expanded is that the macro in question was disabled.\newline%
+\fvmargin{The C standard states that, after any parameters have been replaced with their possibly-expanded arguments, the replacement list is scanned for nested macros. Further, any identifiers in the replacement list that are not expanded during this scan are never again eligible for expansion in the future, if the reason they were not expanded is that the macro in question was disabled.\newline%
 	\newline%
 	Clearly this latter condition can only apply to tokens resulting from argument pre-expansion. Other tokens never have an opportunity to be re-tested for expansion. It is possible for identifiers that are function-like macros to not expand initially but to expand during a later scan. This occurs when the identifier is the last token of an argument (and therefore originally followed by a comma or a closing parenthesis in its macro’s argument list), and when it replaces its parameter in the macro’s replacement list, the subsequent token happens to be an opening parenthesis (itself possibly the first token of an argument).\newline%
 	\newline%
@@ -798,7 +798,7 @@ one more than the number of parameters in the macro definition (excluding the
 \rSec2[cpp.subst]{Argument substitution}%
 \indextext{macro!argument substitution}%
 \indextext{argument substitution|see{macro, argument substitution}}%
-\marginfv{\newline%
+\fvmargin{\newline%
 	\href{http://www.boost.org/doc/libs/release/libs/wave/doc/macro_expansion_process.html}{1. Wave Mensonides Algorithm} \newline%
 \href{https://gcc.gnu.org/onlinedocs/gcc-6.3.0/cpp/Argument-Prescan.html}{2. GCC Argument Prescan} \newline%
 \href{https://gcc.gnu.org/onlinedocs/cppinternals/Macro-Expansion.html}{3. GCC Macro Expansion} \newline%
@@ -987,7 +987,7 @@ In other words, expanding \tcode{hash_hash} produces a new token,
 consisting of two adjacent sharp signs, but this new token is not the
 \tcode{\#\#} operator. \end{example}
 
-\marginfv{
+\fvmargin{
 	\newline%
 Notice the cool manipulation involved below:\newline%
 \tcode{
