@@ -1001,19 +1001,6 @@ In other words, expanding \tcode{hash_hash} produces a new token,
 consisting of two adjacent sharp signs, but this new token is not the
 \tcode{\#\#} operator. \end{example}
 
-\fvmargin{
-	\newline%
-Notice the cool manipulation involved below:\newline%
-\tcode{
-\#define A(x) x \newline%
-\#define B(x) x \newline%
-A( B )( () ) // expands to: () \newline%
-B( A )( () ) // expands to: () \newline%
-A( A )( () ) // expands to: A( () ) \newline%
-B( B )( () ) // expands to: B( () ) \newline%
-} \newline%
-\newline%
-}
 \rSec2[cpp.rescan]{Rescanning and further replacement}%
 \indextext{macro!rescanning and replacement}%
 \indextext{rescanning and replacement|see{macro, rescanning and replacement}}
@@ -1043,6 +1030,46 @@ The resulting completely macro-replaced preprocessing token sequence
 is not processed as a preprocessing directive even if it resembles one,
 but all pragma unary operator expressions within it are then processed as
 specified in~\ref{cpp.pragma.op} below.
+
+\fvmargin{
+	\newline%
+	Notice the cool manipulation involved below:\newline%
+	\tcode{
+		\#define A(x) x \newline
+		\#define B(x) x \newline
+		A( B )( () ) // expands to: () \newline
+		B( A )( () ) // expands to: () \newline
+		A( A )( () ) // expands to: A( () ) \newline
+		B( B )( () ) // expands to: B( () ) \newline
+		\newline
+		\newline
+		NOTE: Keep in mind with the below example that for a function-like macro invocation, unless the token following the name is actually an ( - as opposed to something that expands to an '(' no expansion takes place during that scan.
+		The following example illustrates:\newline
+		- EXP1: no argument expansion with concatenation\newline
+		- EXP2: argument expansion\newline 
+		- EXP3: \newline
+		\#define LPAREN (  \newline
+		\#define W() X LPAREN ) \newline
+		\#define X() Y LPAREN ) \newline
+		\#define Y() Z LPAREN ) \newline
+		\newline
+		\#define EXP1(a, b)  a \#\# b \newline
+		\#define EXP2(a)  EXP1(a,) \newline
+		\#define EXP3(a)  EXP2(a) \newline
+		\newline
+		// expands only during final rescanning\newline
+		EXP1(W(),)    ==> X() \newline\newline
+		// expands once during argument substitution\newline
+		// then during rescanning \newline
+		EXP2(W())     ==> Y() \newline\newline
+		// expands twice during argument substitution\newline
+		// then once during rescanning\newline
+		EXP3(W())     ==> Z() \newline
+		\newline
+		\newline
+	} \newline
+}
+
 
 \rSec2[cpp.scope]{Scope of macro definitions}%
 \indextext{macro!scope of definition}%
