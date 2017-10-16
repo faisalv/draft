@@ -5741,12 +5741,12 @@ requirements as detailed in this subclause
 ; other contexts have different
 semantics depending on whether or not an expression satisfies these requirements.
 Expressions that satisfy these requirements,
-assuming that copy elision is performed \fvnote{Copy elision is manadatory for constant expressions \fvcwg{2022}},
-are called 
+assuming that copy elision is performed \begin{fvnote}Copy elision is mandatory for constant expressions \fvcwg{2022} \end{fvnote}, are called 
 \indexdefn{expression!constant}%
 \defnx{constant expressions}{constant expression}. \begin{note} Constant expressions can be evaluated
 during translation.\end{note}
-\begin{fvnote} The reasons for resistance to clearly stating that constant expression evaluation occurs during  translation phase 7 and 8 is somewhat described in the following thread \href{http://lists.isocpp.org/core/2016/07/0741.php}{cwg-discussion-741}\end{fvnote}
+\begin{fvnote} The reasons for resistance to clearly stating that constant expression evaluation occurs during  translation phase 7 and 8 is somewhat described in the following thread \href{http://lists.isocpp.org/core/2016/07/0741.php}{cwg-discussion-741} 
+\end{fvnote}
 
 \begin{bnf}
 \nontermdef{constant-expression}\br
