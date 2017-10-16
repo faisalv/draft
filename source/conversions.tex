@@ -268,7 +268,19 @@ The $n$-tuple of cv-qualifiers after the first one
 in the longest cv-decomposition of \tcode{T}, that is,
 $cv_1, cv_2, \dotsc, cv_n$, is called the
 \defn{cv-qualification signature} of \tcode{T}.
-
+\fvmargin{
+	To perform the cv-decomposition, you have to \uline{reorder} the structure of the type declaration and decompose it into a tuple.  As an example consider: \newline
+	\tcode{\newline
+		struct X;\newline
+		const double *volatile X::*const volatile A[10] \newline
+		\newline
+		(CV0 = 'const volatile' P0 = 'array of 10') \newline
+		(CV1 = 'const volatile' P1 = 'X::*')\newline
+		(CV2 = 'volatile' P2 = '*') \newline
+		(CV3 = 'const') U = 'double'}   \newline
+	Jens' paper (\fvpaper{n4261})\newline
+	\href{https://listarchives.isocpp.org/cgi-bin/wg21/message?wg=core&msg=26242}{cwg archived thread discussing cv-decomposition formulation}
+}
 \pnum
 \indextext{type!similar|see{similar types}}%
 Two types $\tcode{T}_1$ and $\tcode{T}_2$ are \defnx{similar}{similar types} if
