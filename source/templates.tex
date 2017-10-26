@@ -3541,7 +3541,14 @@ parameter.
 For example, a template type parameter can be used in the
 \tcode{sizeof} operator.
 \end{note}
-
+\fvmargin{These rules can be summarized as follows, when applied to two dependent expressions in constraints:\newline\newline
+-- Compare the token sequences of the two expressions (where differences in the token sequences due to different identifiers being used to name a template (or function) parameter are ignored)\newline\newline
+-- If the token sequences are identical, the expressions are equivalent.\newline\newline
+-- If the token sequences are not identical but have the same meaning for all possible
+template arguments, the expressions are “functionally equivalent but not equivalent”, and any program that results in such a comparison being attempted is ill-formed, with no diagnostic required.\newline\newline
+-- Otherwise (the token sequences are not identical and there are some actual template arguments for which they mean different things), the expressions are non-equivalent.\newline\newline
+The third bullet exists in order to avoid unreasonably burdening implementations with tracking the original token sequences: semantics-preserving canonicalization is permitted prior to performing the comparison.
+}
 \pnum
 \indextext{expression!equivalent|see{equivalent, expressions}}%
 Two expressions involving template parameters are considered
