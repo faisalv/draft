@@ -1635,6 +1635,30 @@ m1();
 std::cout << a << b << c;
 \end{codeblock}
 \end{example}
+\fvmargin{
+\href{http://lists.isocpp.org/core/2017/10/3129.php}{Richard and Daveed CWG}\newline\newline
+> Daveed: What happens if the lambda Doesn't have a capture default?  E.g.:\newline
+\tcode{
+        void g(int x) \{ \newline
+          \mbox{\xspace\xspace []\{ } \newline
+          \mbox{\xspace\xspace\xspace\xspace  decltype((x)) y = 1;  // Type of y?} \newline
+          \mbox{\xspace\xspace\}();}\newline
+        \}\newline
+}
+Clang changes the type to int\& (from const int\&).  \newline
+> Richard:\newline
+IIUC, the point of this rule is to deal with the cases where 'x' is captured, but we don't find out until later in the lambda's body. It would make sense to me for this special case to only apply when the lambda has an [=] capture-default. (Note that the wording also doesn't work if the lambda has a [\&] capture-default, since there is no such corresponding data member in that case.) Put another way, decltype((x)) should give the type that the expression 'x' would have if it appeared in the lambda-body outside of an unevaluated operand.\newline
+Given that model, the type of y would be 'int\&' unless the lambda has a capture-default of [=], in which case the type would be 'const int\&'. As evidence that this is a somewhat-consistent model, consider:\newline
+\tcode{int g;\newline
+void f() \{\newline
+  \mbox{\xspace\xspace int \&v = g;}\newline
+  \mbox{\xspace\xspace[?]\{ decltype(auto) r = (v); \};}\newline
+\} \newline
+}\newline
+* If the capture list has a [=] capture-default and doesn't mention v, or explicitly captures v by copy, the type of 'r' is 'const int \&', and the reference binds to the member of the closure type.\newline
+ * If the capture list has any other capture list, the type of 'r' is 'int \&', and the reference binds to the global variable 'g'.\newline
+[=] fundamentally changes what 'x' would mean within the lambda, to make it refer to a different entity than it would with []. It seems reasonable to me that it would also affect the type as determined by decltype.
+}
 
 \pnum
 When the \grammarterm{lambda-expression} is evaluated, the entities that are
