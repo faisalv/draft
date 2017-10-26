@@ -39,7 +39,19 @@ by the rules for function call. Relations between operators, such as
 \tcode{++a} meaning \tcode{a+=1}, are not guaranteed for overloaded
 operators\iref{over.oper}.
 \end{note}
-
+\fvmargin{
+On \uline{PRECEDENCE} and \uline{ASSOCIATIVITY}\newline
+	\href{https://stackoverflow.com/questions/20767745/who-defines-c-operator-precedence-and-associativity}{StackOverFlow answer}\newline%
+	\textit{additive-expression:\newline
+	\mbox{\xspace \xspace multiplicative-expression}\newline
+	\mbox{\xspace\xspace additive-expression + multiplicative-expression}\newline
+	\mbox{\xspace\xspace additive-expression - multiplicative-expression}\newline\newline}
+	As you can see, a multiplicative-expression is a subrule of an additive-expression. This means that if you have something like x + y * z, the y * z expression is a subexpression of x + y * z. This defines the precedence between these two operators.\newline
+	We can also see that the left operand of an additive-expression expands to another additive-expression, which means that with x + y + z, x + y is a subexpression of it. This defines the associativity.
+	Associativity determines how adjacent uses of the same operator will be grouped. For example, + is left-to-right associative, which means that x + y + z will be grouped like so: (x + y) + z.
+	Don't mistake this for order of evaluation. There is absolutely no reason why the value of z could not be computed before x + y is. What matters is that it is x + y that is computed and not  y + z
+	For the function call operator, left-to-right associativity means that f()() (which could happen if f returned a function pointer, for example) is grouped like so: (f())() (of course, the other direction wouldn't make any sense).\newline
+}
 \pnum
 Subclause \ref{expr.compound} defines the effects of operators when applied to types
 for which they have not been overloaded. Operator overloading shall not

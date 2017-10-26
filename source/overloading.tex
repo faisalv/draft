@@ -17,6 +17,25 @@ Only function and function template
 declarations can be overloaded; variable and type declarations
 cannot be overloaded.
 
+\fvmargin{
+	A call to a named function is broadly processed as following:\newline
+	\begin{enumerate}
+		\item The name is looked up to form an initial overload set
+		\item For each function in the set of overloaded functions:
+		\begin{enumerate}
+			\item For template functions: 
+			\begin{enumerate}
+				\item substitution of any explicit template arguments occurs, and if that succeeds, then
+				\item the usual type conversion occur (function/array decay)
+				\item template argument deduction is attempted for deducible dependent parameters and if deduction succeeds, then
+				\item all parameters that were non-dependent (even prior to substitution of explicitly specified template arguments) are checked for valid implicit conversions, and if that succeeds, then
+				\item substitution of deduced template arguments and default template arguments occurs, and if that succeeds
+				\item constraint satisfaction occurs, and if that succeeds the substituted function-declaration is added.
+			\end{enumerate}
+		\end{enumerate}
+	\end{enumerate}	
+}
+
 \pnum
 When an overloaded function name is used in a call, which overloaded function
 declaration is being referenced is determined by comparing the types
