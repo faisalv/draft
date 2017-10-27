@@ -715,15 +715,9 @@ see~\ref{class.friend}.
 
 \rSec2[dcl.constexpr]{The \tcode{constexpr} specifier}%
 \indextext{specifier!\idxcode{constexpr}}
-
-\pnum
-The \tcode{constexpr} specifier shall be applied only to the definition of
-a variable or variable template or
-the declaration of a
-function or function template. \begin{fvnote} 
+\fvmargin{
 As to why constexpr is not optional on function definitions see this thread:
 \href{http://lists.isocpp.org/core/2016/07/0737.php}{cwg-discussion0737}
-\begin{codeblock} 
 I believe the arguments for making 'constexpr' optional are:
 - 'constexpr' on a function definition might imply that a function
 is usable in a constant-expression - but that's not true - so it can
@@ -740,7 +734,6 @@ which wouldn't affect semantics)
 assuming folks don't use it on every function that they think might be
 usable in a constant expression.
 - what else?
-
 Arguments against making it optional are:
 - we signify the intent (contract) that the function was designed to
 be usable in a constant expression (but this could be done through
@@ -749,7 +742,6 @@ future-proof?
 - we might trigger more template instantiations for templates that
 don't even meet the minimal requirements.
 - what else?
-
 > If the authors did not intend for the function to be usable in a constant
 > expression (but it happens to be usable currently), users may come to depend
 > (or accidentally depend) on the usability of the function in constant
@@ -757,14 +749,17 @@ don't even meet the minimal requirements.
 > initialization of their non-locals gets "broken" when some random function
 > is refactored so that it calls something from a separately-compiled library.
 >
-
 Agreed - this is a compelling risk. Not sure how prevalent it truly
 would be, but I admit it doesn't seem that unusual.  I suppose this
 concern in itself is enough to kill any thoughts of making 'constexpr'
 optional on a function?
+}
 
-\end{codeblock}
-\end{fvnote}
+\pnum
+The \tcode{constexpr} specifier shall be applied only to the definition of
+a variable or variable template or
+the declaration of a
+function or function template. 
 A function or static data member declared with the \tcode{constexpr}
 specifier is implicitly an inline function or variable\iref{dcl.inline}.
 If any declaration of a function or function template has
