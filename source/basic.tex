@@ -265,6 +265,17 @@ struct C {
 \indextext{type!incomplete}%
 A program is ill-formed if the definition of any object gives the object
 an incomplete type\iref{basic.types}.
+\fvmargin{"The C++14 wording for odr-use works as follows: normally, any mention of a variable in a potentially-evaluated expression would be an odr-use and would require a definition. However, for a variable whose value can be read in a constant expression ("satisfies the requirements for appearing in a[n lvalue-to-rvalue conversion in a] constant expression"), and for which only the value (and not the address or storage) is needed, a definition (or, for a lambda, a capture) is not required. In practice, in such cases, a compiler would emit the value directly rather than emitting a reference to the object.	\newline\newline The rest of the relevant wording is explaining the circumstances under which an implementation is required to determine that only the value is needed. This is the case if we can:\newline1) start from either an lvalue-to-rvalue conversion or a discarded value expression,\newline2) walk over constructs which clearly don't introduce a use of the value's address or storage (those listed in 3.2/2), and\newline3) find the use of the variable."-rsmith\newline\newline%
+REMEMBER in regards to the wording:\newline%
+	--- \xspace A variable is NOT a data member \newline%
+	- \xspace\xspace\xspace\xspace\xspace In \tcode{struct A \{ int d; \};} \tcode{d} is not a variable,\newline%
+	- \xspace\xspace\xspace\xspace\xspace and potentially evaluated expressions and odr-use\newline 
+	- \xspace\xspace\xspace\xspace\xspace refer only to variables.\newline
+%	
+	--- \xspace Only if 'x' is an object do we require the lvalue-to-rvalue conversion on 'e' to avoid odr-use, but if 'x' is a reference that is initialized with a constant expression, then it will not be odr-used.\newline%
+	--- \xspace 'ex' is like DeclRefExpr (clang) it is the id-expression within an 'e' that names 'x'\newline
+	--- \xspace 'e' is not the full expression - but any contained expression 'e' within the full-expression that has 'ex' as its potential results - and lval-to-rval conversion is applied - the goal is to find such an 'e' that has such an 'ex' as its potential result%
+}
 
 \indextext{object!definition}%
 \indextext{function!definition}%
@@ -305,17 +316,6 @@ potential results of the second and third operands.
 contains the potential results of the right operand.
 \item Otherwise, the set is empty.
 \end{itemize}
-\fvmargin{"The C++14 wording for odr-use works as follows: normally, any mention of a variable in a potentially-evaluated expression would be an odr-use and would require a definition. However, for a variable whose value can be read in a constant expression ("satisfies the requirements for appearing in a[n lvalue-to-rvalue conversion in a] constant expression"), and for which only the value (and not the address or storage) is needed, a definition (or, for a lambda, a capture) is not required. In practice, in such cases, a compiler would emit the value directly rather than emitting a reference to the object.	\newline\newline The rest of the relevant wording is explaining the circumstances under which an implementation is required to determine that only the value is needed. This is the case if we can:\newline1) start from either an lvalue-to-rvalue conversion or a discarded value expression,\newline2) walk over constructs which clearly don't introduce a use of the value's address or storage (those listed in 3.2/2), and\newline3) find the use of the variable."-rsmith\newline\newline%
-REMEMBER in regards to the wording:\newline%
-	--- \xspace A variable is NOT a data member \newline%
-	- \xspace\xspace\xspace\xspace\xspace In \tcode{struct A \{ int d; \};} \tcode{d} is not a variable,\newline%
-	- \xspace\xspace\xspace\xspace\xspace and potentially evaluated expressions and odr-use\newline 
-	- \xspace\xspace\xspace\xspace\xspace refer only to variables.\newline
-%	
-	--- \xspace Only if 'x' is an object do we require the lvalue-to-rvalue conversion on 'e' to avoid odr-use, but if 'x' is a reference that is initialized with a constant expression, then it will not be odr-used.\newline%
-	--- \xspace 'ex' is like DeclRefExpr (clang) it is the id-expression within an 'e' that names 'x'\newline
-	--- \xspace 'e' is not the full expression - but any contained expression 'e' within the full-expression that has 'ex' as its potential results - and lval-to-rval conversion is applied - the goal is to find such an 'e' that has such an 'ex' as its potential result%
-}
 
 
 \begin{note}
