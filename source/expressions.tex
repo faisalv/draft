@@ -5751,10 +5751,6 @@ has three arguments, the second of which has the value
 \rSec1[expr.const]{Constant expressions}%
 \indextext{expression!constant}
 
-\pnum
-Certain contexts require expressions that satisfy additional
-requirements as detailed in this subclause 
-
 \fvmargin{
   Certain 'grammar productions' require \grammarterm{constant-expressions}: \newline%
   \mbox{ \xspace\xspace 1. \grammarterm{noptr-new-declarator [ constant-expression ]}}\newline%
@@ -5774,7 +5770,9 @@ requirements as detailed in this subclause
   \mbox{ \xspace\xspace 10. \tcode{noexcept} ( \grammarterm{constant-expression} ) }\newline%
 }
 
-; other contexts have different
+\pnum
+Certain contexts require expressions that satisfy additional
+requirements as detailed in this subclause; other contexts have different
 semantics depending on whether or not an expression satisfies these requirements.
 Expressions that satisfy these requirements,
 assuming that copy elision is performed \begin{fvnote}Copy elision is mandatory for constant expressions \fvcwg{2022} \end{fvnote}, are called 
