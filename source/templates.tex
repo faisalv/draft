@@ -1544,20 +1544,20 @@ There are three different kinds of constraints:
 \item disjunctions\iref{temp.constr.op}, and
 \item atomic constraints\iref{temp.constr.atomic}
 \end{itemize}
-
+\fvmargin{Just forming a specialization of a class, variable or alias (not even instantiating it, requires satisfaction of its constraints)}
 \pnum
 In order for a constrained template to be instantiated\iref{temp.spec},
 its associated constraints\iref{temp.constr.decl}
 shall be satisfied as described in the following subsections.
 \begin{note}
-Forming the name of a specialization of
+\fvhl{Forming the name of a specialization of
 a class template,
 a variable template, or
 an alias template\iref{temp.names}
 requires the satisfaction of its constraints.
 Overload resolution\iref{over.match.viable}
 requires the satisfaction of constraints
-on functions and function templates.
+on functions and function templates.}
 \end{note}
 
 \rSec3[temp.constr.op]{Logical operations}
@@ -1628,10 +1628,22 @@ template arguments involving the
 template parameters of the constrained entity,
 called the \defn{parameter mapping}\iref{temp.constr.decl}.
 \begin{note}
-Atomic constraints are formed by constraint normalization\iref{temp.constr.normal}.
+\fvhl{Atomic constraints are formed by constraint normalization\iref{temp.constr.normal}.}
 \tcode{E} is never a logical AND expression\iref{expr.log.and}
 nor a logical OR expression\iref{expr.log.or}.
 \end{note}
+
+\fvmargin{
+	-- Can think of concepts as macros for expressions - they let you get the exact same expression where you need it - and they are the only thing that let you do that.  every other spelling of an expression - though similar in spelling - is not the SAME expression.\newline\newline
+	-- same expression - means same source level construct\newline\newline
+	-- 'same expression' is not required when doing declaration matching for redeclaration purposes.
+	\fvpaper{p0717}\newline\newline
+    -----------------------------------------------------------------\newline\newline
+		For a constraint to be satisfied, two things have to occur:\newline
+		- substitution into the atomic-constraint (using the p-mapping and t-args) must succeed\newline
+		- the atomic-constraints must evaluate to true\newline
+		NOTE: if the atomic-constraint is not EXACTLY of type 'bool' an error occurs\newline
+}
 
 \pnum
 Two atomic constraints are
@@ -1675,7 +1687,25 @@ void g() {
 \end{example}
 
 \rSec2[temp.constr.decl]{Constrained declarations}
-
+\fvmargin{\uline{NOTES ON PARAMETER MAPPING}:\newline
+	\href{http://lists.isocpp.org/core/2017/10/3153.php}{cwg-reflector-discussion}\newline
+	\newline -- think of parameter mappings as a way to substitute various non-canonical template-parameters to get the eventual requires expression into a canonical (0-0 clang rep) templater-parameter form (ignore eventual template arguments)
+	\newline -- substitution during creation of 'parameter mappings' is DIFFERENT (ill-formed) from substitution within the constraint expression (SFINAE)\newline
+	-- parameter mappings are non-empty and non-identity only if one concept references another and adds 'something' to the parameter - and creates levels of mapping of types until it gets to substitution with the atomic-constraints of a concept\newline\newline\newline
+	\tcode{template<class T, class U> concept C1 = 	\newline
+		sizeof(T**) == sizeof(U*);\newline
+		template<class V, class W> concept C2 = C1<W*, V*>;\newline
+	}\newline
+	\term{NOTE: no \tcode{void f(X,Y)} since that would be beaten at the partial specialization stage before we even get to the constraint subsumption check.}\newline
+	\tcode{template<class X, class Y> req C1<X*,Y*> void f(X*,Y*);  \#1\newline
+		template<class X, class Y> req C2<X,Y> void f(X*,Y*);   \#2\newline
+		template<class X, class Y> req C2<X,Y> void f(X*,Y*) requires true; \#3\newline}
+	C1<X*,Y*>  should normalize to the same associated constraints as C2<int> - and the mapping enables that.  Consider:
+	f((int*)0);
+	\#1 : TArg : V = int*, Map: T -> V
+	\#2 : TArg : V = int, Map: T -> V*  
+	When satisfying, first substitute the parameter mapping into each atomic-constraint - and then the template argument for e.g. in \#2 : sizeof(V*) == sizeof(V**)
+}
 \pnum
 A template declaration\iref{temp}
 or function declaration\iref{dcl.fct}
@@ -1795,6 +1825,7 @@ after substituting \tcode{A$_1$, A$_2$, ..., A$_n$} for
 parameter mappings in each atomic constraint.
 If any such substitution results in an invalid type or expression,
 the program is ill-formed; no diagnostic is required.
+
 \begin{example}
 \begin{codeblock}
 template<typename T> concept A = T::value || true;
@@ -1820,6 +1851,7 @@ the atomic constraint
 whose expression is \tcode{E} and
 whose parameter mapping is the identity mapping.
 \end{itemize}
+
 
 \pnum
 The process of obtaining the normal form of a
@@ -1859,7 +1891,21 @@ The associated constraints of \#3 are
 
 \rSec2[temp.constr.order]{Partial ordering by constraints}
 \indextext{subsume|see{constraint, subsumption}}
-
+\fvmargin{Subsumption is implication : \newline
+To check if P --> Q:\newline 
+  -- If P = (A AND B) and Q = (A OR B) then P implies Q because there exists an element of (A AND B) in (A OR B) it would also imply Q = A  or Q = B\newline
+  -- A OR B does not imply A AND B\newline
+  -- Transform P into an equivalent logical expression with (disjunctive)clauses \term{Pi} each separated by \tcode{'OR'}s - and each clauses' components are atomic constraints separated by \tcode{'AND'} (DNF): \tcode{(A AND B) OR (C AND D)}\newline
+  -- Transform Q into an equivalent logical expression with (conjunctive)clauses \term {Qj} separated by \tcode{'AND'}s - and each clauses' components are atomic constraints separate by \tcode{'OR'} (CNF): \tcode{(A OR C) AND (A OR D) AND (B OR C) AND (B OR D)}.\newline
+  -- Then ensure that each disjunctive clause \term{Pi} in P subsumes every conjunctive clause \term{Qi} in Q.\newline
+  ----  \term{Pi} subsumes \term{Qi} if you find some atomic-constraint \term{Pia} (separated by \tcode{AND}) in \term{Qi}.\newline
+  -- Disjunctive Normal Form: (A \& C) | (A \& D) | (B \& C) | (B \& D)\newline  
+  -- Conjunctive Normal Form: (A | B) \& (C | D)\newline
+This was implemented in gcc using a tactical theorem prover as described in ML for the working programmer.\newline\newline
+- If P does not contain any '||'s, then use P\newline
+- If P does not contain any parenthetical grouping, use P\newline
+else convert it into an equivalent logical expression that is separated by '||'\newline
+}
 \pnum
 A constraint $P$ is said to subsume another constraint $Q$
 if it can be determined that $P$ implies $Q$, up to
