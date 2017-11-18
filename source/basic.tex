@@ -2604,6 +2604,9 @@ non-bit-field declaration. It is not safe to concurrently update two bit-fields
 in the same struct if all fields between them are also bit-fields of nonzero
 width. \end{note}
 
+\fvmargin{Use zero-sized bit fields, or nest a data member within a nested struct to prevent conflicting access}
+
+
 \pnum
 \begin{example} A structure declared as
 
@@ -2630,6 +2633,8 @@ bit-fields \tcode{b} and \tcode{c} cannot be concurrently modified, but
 
 \pnum
 \indextext{object model|(}%
+\fvmargin{Objects are only created by definitions, new-expressions or as temporaries.  \tcode{malloc} does not create an object.  Also, definition of object was modified. See \fvcwg{1776} and papers \fvpaper{n3751}, \fvpaper{P0137}, \fvcwg{2182}, which makes vector::data unimplementable since while it uses an underlying char array it does not have an array object of T, so how can you do pointer arithmetic with it}
+
 The constructs in a \Cpp program create, destroy, refer to, access, and
 manipulate objects.
 An \defn{object} is created
@@ -2784,9 +2789,9 @@ an object of a most derived class type or of a non-class type is called a
 \indextext{most derived object!bit-field}%
 Unless it is a bit-field\iref{class.bit}, a most derived object shall have a
 nonzero size and shall occupy one or more bytes of storage. Base class
-subobjects may have zero size. An object of trivially copyable or
+subobjects may have zero size. \fv{An object of trivially copyable or
 standard-layout type\iref{basic.types} shall occupy contiguous bytes of
-storage.
+storage.}
 
 \pnum
 \indextext{most derived object!bit-field}%
@@ -4464,6 +4469,7 @@ full-expression. For example, subexpressions involved in evaluating
 default arguments\iref{dcl.fct.default} are considered to
 be created in the expression that calls the function, not the expression
 that defines the default argument. \end{note}
+\fvmargin{ ?? side effects are not the same as observable behavior.  They are used solely to specify the sequenced before relationship \fvcwg{n2239} \fvcwg{637}.}
 
 \pnum
 \indextext{value computation|(}%
@@ -4665,6 +4671,18 @@ to other threads that later perform a consume or an acquire operation on
 \placeholder{A}. ``Relaxed'' atomic operations are not synchronization operations even
 though, like synchronization operations, they cannot contribute to data races.
 \end{note}
+\fvmargin{A modification order does not imply happens-before, though it must be consistent with happens-before.  That is the following program still has a data-race: \newline \newline%
+	\tcode{atomic<int> a;\newline double payload;}%
+	\newline \newline T1:\newline %
+	\tcode{if (a.load(relaxed)==0) %
+		\{\newline
+		\mbox{ \xspace\xspace payload = 3.14;}\newline 
+		\mbox{ \xspace\xspace ai.store(1, relaxed);}\newline%
+		\}}%
+	\newline\newline T2:\newline %
+	\tcode{if (a.load(relaxed)==1) %
+		\newline \mbox{\xspace\xspace payload += 1;}%
+}} 
 
 \pnum
 All modifications to a particular atomic object \placeholder{M} occur in some
@@ -4842,7 +4860,7 @@ The value of an
 atomic object \placeholder{M}, as determined by evaluation \placeholder{B}, shall be the value
 stored by some
 side effect \placeholder{A} that modifies \placeholder{M}, where \placeholder{B} does not happen
-before \placeholder{A}.
+before \placeholder{A}.\begin{fvnote}{This does not mean that \placeholder{A} happens-before \placeholder{B}}\end{fvnote}
 \begin{note}
 The set of such side effects is also restricted by the rest of the rules
 described here, and in particular, by the coherence requirements below.
