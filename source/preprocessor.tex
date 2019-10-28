@@ -10,6 +10,50 @@
 
 \rSec1[cpp.pre]{Preamble}
 
+\fvmargin{
+	\href{https://gcc.gnu.org/onlinedocs/gcc-6.3.0/cpp/}{GCC Preprocessor Manual}\newline
+	Preprocessing directives are lines in your program that start with '\tcode{\#}'. Whitespace is allowed before and after the '\tcode{\#}'. \newline
+	\newline
+	\underline{Macro Replacement Process Sketch}\newline
+	\begin{itemize}
+		\item When scanning/lexing, if an identifier that has been defined as a macro is found, it is replaced with its replacement-list (phase 4)
+		\item Argument Expansion for function like macros: the arguments are first expanded prior to substitution within the replacement list (unless the argument has either \tcode{\#} or \tcode{\#\#} applied to it.).  
+		\begin{itemize}
+			\item A macro-id for a function-like macro is not disabled until after argument expansion so for e.g. this is OK (note: \tcode{x,y} do not form two arguments for outer invocation of \tcode{A}):\newline
+			\newline
+			\tcode{\#define A(x,y) x,y\newline
+				\mbox{ \space\space A(A(1,2),3) ==> 1,2,3}\newline
+			}
+			\item if during argument expansion a macro-id is recursively expanded it is disabled, then when examined in the context of the replacement list it is still not expanded. Note, since A is disabled in the invocation of B, it is legal to end up with A() since the preprocessor won't try to macro-expand it\newline
+			\newline
+			\tcode{\#define A(x,y) A\newline
+				\#define B(b) b\newline
+				\mbox{ \space\space A() ==> ERROR!}\newline
+				\mbox{ \space\space B(A(1,2))() ==> A()}
+			}
+		\end{itemize}
+		\item Macro arguments are optional (replaced by 'placemarker' tokens), but the commas for non-ellipsis parameters are not optional i.e\newline
+		\newline
+		\tcode{\#define X(a,b) \#a,\#b\newline
+			\mbox{ \space\space X(,) ==> "",""}\newline
+			\mbox{ \space\space X() ==> ERROR!}\newline
+			\mbox{ \space\space X(u,) ==> "u",""}\newline
+			\mbox{ \space\space X(,v) ==> "","v"}\newline}
+		\item When a macro is replaced, the context of that macro is popped off (since function-like macros are not invoked until the left-paren which is seen following context-pop-off, NO recursively disabled macros below ):\newline
+		\newline
+		\tcode{\#define A(x) a x\newline
+			\#define B(x) b x\newline
+			\mbox{\space\space A(B)(A)(B)(abc) ==> a b a b abc}
+			\newline\newline
+			\#define A2(x) x <a2> A1\newline
+			\#define A1(x) x <a1> A2\newline
+			\mbox{\space\space A1(2)(3)(4) ==> 2 <a1> 3 <a2> 4 <a1> A2}
+			\mbox{\space\space A2(2)(3)(4) ==> 2 <a2> 3 <a1> 4 <a2> A1}
+		}
+	\end{itemize}
+}
+
+
 \begin{bnf}
 \nontermdef{preprocessing-file}\br
     \opt{group}\br
@@ -687,6 +731,19 @@ preprocessing token pair or a pair of
 \tcode{"}
 characters is combined into a single header name
 preprocessing token is \impldef{search locations for \tcode{""""} header}.
+\fvmargin{The C standard states that, after any parameters have been replaced with their possibly-expanded arguments, the replacement list is scanned for nested macros. Further, any identifiers in the replacement list that are not expanded during this scan are never again eligible for expansion in the future, if the reason they were not expanded is that the macro in question was disabled.\newline%
+	\newline%
+	Clearly this latter condition can only apply to tokens resulting from argument pre-expansion. Other tokens never have an opportunity to be re-tested for expansion. It is possible for identifiers that are function-like macros to not expand initially but to expand during a later scan. This occurs when the identifier is the last token of an argument (and therefore originally followed by a comma or a closing parenthesis in its macro’s argument list), and when it replaces its parameter in the macro’s replacement list, the subsequent token happens to be an opening parenthesis (itself possibly the first token of an argument).\newline%
+	\newline%
+	It is important to note that when cpplib reads the last token of a given context, that context still remains on the stack. Only when looking for the next token do we pop it off the stack and drop to a lower context. This makes backing up by one token easy, but more importantly ensures that the macro corresponding to the current context is still disabled when we are considering the last token of its replacement list for expansion (or indeed expanding it). As an example, which illustrates many of the points above, consider\newline%
+	\newline%
+	\tcode{\#define foo(x) bar x\newline%
+		foo(foo) (2)}\newline%
+	\newline%
+	which fully expands to \tcode{bar foo (2)}. During pre-expansion of the argument, \tcode{foo} does not expand even though the macro is enabled, since it has no following parenthesis [pre-expansion of an argument only uses tokens from that argument; it cannot take tokens from whatever follows the macro invocation]. This still leaves the argument token \tcode{foo} eligible for future expansion. Then, when re-scanning after argument replacement, the token \tcode{foo} is rejected for expansion, and marked ineligible for future expansion, since the macro is now disabled. It is disabled because the replacement list \tcode{bar foo} of the macro is still on the context stack.\newline%
+	\newline%
+	If instead the algorithm looked for an opening parenthesis first and then tested whether the macro were disabled it would be subtly wrong. In the example above, the replacement list of 'foo' would be popped in the process of finding the parenthesis, re-enabling 'foo' and expanding it a second time. }
+
 
 \pnum
 The implementation shall provide unique mappings for
@@ -1157,7 +1214,11 @@ one more than the number of parameters in the macro definition (excluding the
 \nontermdef{va-opt-replacement}\br
     \terminal{\mname{VA_OPT} (} \opt{pp-tokens} \terminal{)}
 \end{bnf}
-
+\fvmargin{\newline%
+	\href{http://www.boost.org/doc/libs/release/libs/wave/doc/macro_expansion_process.html}{1. Wave Mensonides Algorithm} \newline%
+	\href{https://gcc.gnu.org/onlinedocs/gcc-6.3.0/cpp/Argument-Prescan.html}{2. GCC Argument Prescan} \newline%
+	\href{https://gcc.gnu.org/onlinedocs/cppinternals/Macro-Expansion.html}{3. GCC Macro Expansion} \newline%
+	}
 \pnum
 After the arguments for the invocation of a function-like macro have
 been identified, argument substitution takes place.
@@ -1303,6 +1364,21 @@ Let the \defn{stringizing argument} be the preprocessing token sequence
 for the corresponding argument with placemarker tokens removed.
 Each occurrence of whitespace between the stringizing argument's preprocessing
 tokens becomes a single space character in the character string literal.
+\fvmargin{
+	\newline
+	\tcode{\#define D(x) \#x
+		\newline\newline
+		D(abc   
+		\newline
+		def
+		\newline
+		ghe)
+		\newline\newline
+		"abc def ghe"
+	}
+	\newline
+}
+
 White space before the first preprocessing token and after the last
 preprocessing token comprising the stringizing argument is deleted.
 Otherwise, the original spelling of each preprocessing token in the
@@ -1360,6 +1436,17 @@ preprocessing token in the replacement list
 (not from an argument) is deleted and the
 preceding preprocessing token is concatenated
 with the following preprocessing token.
+\fvmargin{
+    Only \tcode{\#\#} within a replacement list leads to concatenation.  Below the argument is not within a replacement list and does not lead to concat during argument substitution!
+	\newline
+	\tcode{\#define D(x) x
+		\newline\newline
+		D(A \#\# B)  ==>  A \#\# B [Not 'AB']
+		\newline\newline
+	}
+	\newline	
+}
+
 Placemarker preprocessing tokens are handled specially: concatenation
 of two placemarkers results in a single placemarker preprocessing token, and
 concatenation of a placemarker with a non-placemarker preprocessing token results
@@ -1460,6 +1547,43 @@ int j[] = { 123, 45, 67, 89,
 \indextext{rescanning and replacement|see{macro, rescanning and replacement}}
 
 \pnum
+\fvmargin{
+	\newline%
+	Notice the cool manipulation involved below:\newline%
+	\tcode{
+		\#define A(x) x \newline
+		\#define B(x) x \newline
+		A( B )( () ) // expands to: () \newline
+		B( A )( () ) // expands to: () \newline
+		A( A )( () ) // expands to: A( () ) \newline
+		B( B )( () ) // expands to: B( () ) \newline
+		\newline
+		\newline
+		NOTE: Keep in mind with the below example that for a function-like macro invocation, unless the token following the name is actually an ( - as opposed to something that expands to an '(' no expansion takes place during that scan.
+		The following example illustrates:\newline
+		- EXP1: no argument expansion with concatenation\newline
+		- EXP2: argument expansion\newline 
+		- EXP3: \newline
+		\#define LPAREN (  \newline
+		\#define W() X LPAREN ) \newline
+		\#define X() Y LPAREN ) \newline
+		\#define Y() Z LPAREN ) \newline
+		\newline
+		\#define EXP1(a, b)  a \#\# b \newline
+		\#define EXP2(a)  EXP1(a,) \newline
+		\#define EXP3(a)  EXP2(a) \newline
+		\newline
+		// expands only during final rescanning\newline
+		EXP1(W(),)    ==> X() \newline\newline
+		// expands once during argument substitution\newline
+		// then during rescanning \newline
+		EXP2(W())     ==> Y() \newline\newline
+		// expands twice during argument substitution\newline
+		// then once during rescanning\newline
+		EXP3(W())     ==> Z() \newline
+	} 
+}
+
 After all parameters in the replacement list have been substituted and \tcode{\#} and \tcode{\#\#} processing has taken
 place, all placemarker preprocessing tokens are removed. Then
 the resulting preprocessing token sequence is rescanned, along with all
