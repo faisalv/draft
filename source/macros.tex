@@ -349,16 +349,15 @@
 %fvmargin Dumps comments in the margin
 % - you must use \mbox within it if you need spaces within code and indentation
 % - each line must end with % except for the last.
-\newcommand{\fvmargin}[1]{%
+\newcommand{\fvmargin}[1]{%  <-- this % here is what prevents insertion of space in text!
 	\stepcounter{fvnum}%
 	\sidepar{%
 		\smaller\color{blue}%
 		[\textit{\fvparabullnum:}\space%
 		#1 \textit{\,---\,end margin\mbox{\fvid}}]%
-		\space\color{black}%
+		\color{black}%
 	}%
 }
-
 
 
 %\newcommand{\addfv}[1]{\stepcounter{fvnum}\color{darkpurple}#1\fvid\color{black}}
