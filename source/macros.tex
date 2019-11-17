@@ -318,16 +318,46 @@
 % Do not embed the stepcounter, since it leads to erroneous calculations.
 %\newcommand{\fvid}{\stepcounter{fvnum}.fv\arabic{fvnum}}
 
-%\newcommand{\notefv}[1]{\stepcounter{fvnum}\color{blue}{[\,\textit{Note:}\, #1 \textit{\,---\,end note\fvid}\,]\xspace}\color{black}}
 
 \newenvironment{fvnote}{\stepcounter{fvnum}\color{blue} [\,\textit{Note:}\,}{\textit{\,---\,end note\fvid}\,]\color{black}}
 
 
 \newcommand{\fverror}[1]{\stepcounter{fvnum}\color{red}{[\,\textit{Error:}\, #1 \textit{\,---\,end error\fvid}\,]}\color{black}}
 
-%\newcommand{\fvmargin}[1]{\stepcounter{fvnum}\sidepar{\smaller\color{blue}[\,\textit{Note:}\xspace #1 \textit{\,---\,end margin\fvid}\,]\xspace\color{black}}}
 
-\newcommand{\fvmargin}[1]{\stepcounter{fvnum}\sidepar{\smaller\color{blue}[\,\textit{Note:}\space #1 \textit{\,---\,end margin\fvid}\,]\space\color{black}}}
+% This command allows us to label margin notes with the corresponding paragraphsthey refer to and is based on \parabullnum from layout.tex
+\makeatletter
+\newcommand{\fvparabullnum}{%
+				\arabic{chapter}.\arabic{section}% Dump out chaper.section
+				\ifnum \value{subsection}>0 .\arabic{subsection}%
+				\ifnum \value{subsubsection}>0 .\arabic{subsubsection}%
+				\ifnum \value{paragraph}>0 .\arabic{paragraph}%
+				\ifnum \value{subparagraph}>0 .\arabic{subparagraph}%
+				\fi\fi\fi\fi%
+				\ifnum \value{Paras}>0
+				\ifnum \value{Bullets1}>0 \fi%
+				\space p\arabic{Paras}%
+				\ifnum \value{Bullets1}>0 .\arabic{Bullets1}%
+				\ifnum \value{Bullets2}>0 .\arabic{Bullets2}%
+				\ifnum \value{Bullets3}>0 .\arabic{Bullets3}%
+				\fi\fi\fi%
+				\ifnum \value{Bullets1}>0 \fi%
+				\fi%
+			}
+\makeatother
+
+%fvmargin Dumps comments in the margin
+% - you must use \mbox within it if you need spaces within code and indentation
+% - each line must end with % except for the last.
+\newcommand{\fvmargin}[1]{%
+	\stepcounter{fvnum}%
+	\sidepar{%
+		\smaller\color{blue}%
+		[\textit{\fvparabullnum \mbox{\fvid}:}\space%
+		#1 \textit{\,---\,end margin\fvid}]%
+		\space\color{black}%
+	}%
+}
 
 
 
