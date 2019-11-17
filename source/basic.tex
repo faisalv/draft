@@ -374,11 +374,11 @@ contains the potential results of the right operand.
 REMEMBER in regards to the wording:\newline%
 	--- \space A variable is NOT a data member \newline%
 	- \space\space\space\space\space In \tcode{struct A \{ int d; \};} \tcode{d} is not a variable,\newline%
-	- \space\space\space\space\space and potentially evaluated expressions and odr-use\newline 
-	- \space\space\space\space\space refer only to variables.\newline
+	- \space\space\space\space\space and potentially evaluated expressions and odr-use\newline%
+	- \space\space\space\space\space refer only to variables.\newline%
 %	
 	--- \space Only if 'x' is an object do we require the lvalue-to-rvalue conversion on 'e' to avoid odr-use, but if 'x' is a reference that is initialized with a constant expression, then it will not be odr-used.\newline%
-	--- \space 'ex' is like DeclRefExpr (clang) it is the id-expression within an 'e' that names 'x'\newline
+	--- \space 'ex' is like DeclRefExpr (clang) it is the id-expression within an 'e' that names 'x'\newline%
 	--- \space 'e' is not the full expression - but any contained expression 'e' within the full-expression that has 'ex' as its potential results - and lval-to-rval conversion is applied - the goal is to find such an 'e' that has such an 'ex' as its potential result%
 }
 
@@ -2990,6 +2990,7 @@ in the same struct if all fields between them are also bit-fields of nonzero
 width.
 \end{note}
 
+\fvmargin{Use zero-sized bit fields, or nest a data member within a nested struct to prevent conflicting access}
 \pnum
 \begin{example}
 A class declared as
@@ -3016,6 +3017,9 @@ bit-fields \tcode{b} and \tcode{c} cannot be concurrently modified, but
 
 \pnum
 \indextext{object model|(}%
+
+\fvmargin{Objects are only created by definitions, new-expressions or as temporaries.  \tcode{malloc} does not create an object.  Also, definition of object was modified. See \fvcwg{1776} and papers \fvpaper{P0593} \fvpaper{n3751}, \fvpaper{P0137}, \fvcwg{2182}, which makes vector::data unimplementable since while it uses an underlying char array it does not have an array object of T, so how can you do pointer arithmetic with it}
+
 The constructs in a \Cpp{} program create, destroy, refer to, access, and
 manipulate objects.
 An \defn{object} is created
@@ -3182,9 +3186,9 @@ an object with nonzero size
 shall occupy one or more bytes of storage,
 including every byte that is occupied in full or in part
 by any of its subobjects.
-An object of trivially copyable or
+\fv{An object of trivially copyable or
 standard-layout type\iref{basic.types} shall occupy contiguous bytes of
-storage.
+storage.}
 
 \pnum
 \indextext{most derived object!bit-field}%
@@ -4311,8 +4315,19 @@ using the eligible trivial constructor to copy the temporary
 or would not be selected by overload resolution
 to perform a copy or move of the object).
 \begin{note}
-This latitude is granted to allow objects of class type to be passed to or returned from functions in registers.
+\fv{This latitude is granted to allow objects of class type to be passed to or returned from functions in registers.}
 \end{note}
+\fvmargin{\href{http://lists.isocpp.org/core/2016/07/0772.php}{See discussion by Jeffrey and Richard reflector-cwg-772:}\newline%
+	It's this copy that the ABI requires be performed today, and that the standard disallows if the type contains a volatile member. Example:\newline\newline%
+\mbox{\space\space\tcode{struct X \{ X *volatile p = this; \};}}\newline%
+\mbox{\space\space\tcode{void f(X x) \{ assert(x.p == \&x); \}}}\newline%
+\mbox{\space\space\tcode{void g() \{ f(\{\}); \}}}\newline%
+\newline\newline%
+If X has a trivial copy or move constructor, a technical copy may be performed as part of the call to f(X), and the assert may fail. Otherwise, the assert must not fail, because the object constructed in g() is the same object as f's parameter.%
+\newline \newline %
+Current ABIs, such as the x86_64 ABI, pass X in registers.%
+\fvcwg{496} \fvcwg{2094}
+}
 
 \pnum
 \indextext{temporary!constructor for}%
@@ -5555,6 +5570,8 @@ that defines the default argument.
 
 \pnum
 \indextext{value computation|(}%
+\fvmargin{side effects are not the same as observable behavior.  They are used solely to specify the sequenced before relationship \fvcwg{2239} \fvcwg{637} \href{https://stackoverflow.com/questions/13271469/how-are-side-effects-and-observable-behavior-related-in-c}{stack-overflow-answer}}%
+\ignorespaces
 Reading an object designated by a \tcode{volatile}
 glvalue\iref{basic.lval}, modifying an object, calling a library I/O
 function, or calling a function that does any of those operations are
@@ -5788,6 +5805,19 @@ $A$. ``Relaxed'' atomic operations are not synchronization operations even
 though, like synchronization operations, they cannot contribute to data races.
 \end{note}
 
+\fvmargin{A modification order does not imply happens-before, though it must be consistent with happens-before.  That is the following program still has a data-race: \newline \newline%
+		\tcode{atomic<int> a;\newline double payload;}%
+		\newline \newline T1:\newline %
+		\tcode{if (a.load(relaxed)==0) %
+				\{\newline
+				\mbox{ \space\space payload = 3.14;}\newline 
+				\mbox{ \space\space ai.store(1, relaxed);}\newline%
+				\}}%
+		\newline\newline T2:\newline %
+		\tcode{if (a.load(relaxed)==1) %
+				\newline \mbox{\space\space payload += 1;}\newline%
+		}} 
+
 \pnum
 All modifications to a particular atomic object $M$ occur in some
 particular total order, called the \defn{modification order} of $M$.
@@ -5999,6 +6029,7 @@ atomic object $M$, as determined by evaluation $B$, shall be the value
 stored by some
 side effect $A$ that modifies $M$, where $B$ does not happen
 before $A$.
+\fvmargin{This does not mean that \placeholder{A} happens-before \placeholder{B}}
 \begin{note}
 The set of such side effects is also restricted by the rest of the rules
 described here, and in particular, by the coherence requirements below.
