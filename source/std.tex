@@ -26,8 +26,8 @@
 \usepackage[final]{microtype}
 \usepackage[splitindex,original]{imakeidx}
 \usepackage{multicol}
-\usepackage{marginnote}
-\usepackage{soul}
+%\usepackage{marginnote}
+\usepackage{soul} % used for highlighting
 \usepackage{lmodern}
 \usepackage{xcolor}
 \usepackage[T1]{fontenc}
@@ -107,14 +107,14 @@
 %%%%%%%%% Begin FV Debug Region to compile specific sections.
 %% Comment out \end{document} and the section you want to compile
 %\include{intro}
-%\include{basic}
+\include{basic}
 %\include{expressions}
 %\include{declarations}
 %\include{derived}
 %\include{special}
 %\include{lex}
 %\include{preprocessor}
-%\end{document}
+\end{document}
 
 
 %%%%%%%%% End FV Debug Region to compile specific sections.
