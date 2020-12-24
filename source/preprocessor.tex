@@ -731,18 +731,6 @@ preprocessing token pair or a pair of
 \tcode{"}
 characters is combined into a single header name
 preprocessing token is \impldef{search locations for \tcode{""""} header}.
-\fvmargin{The C standard states that, after any parameters have been replaced with their possibly-expanded arguments, the replacement list is scanned for nested macros. Further, any identifiers in the replacement list that are not expanded during this scan are never again eligible for expansion in the future, if the reason they were not expanded is that the macro in question was disabled.\newline%
-	\newline%
-	Clearly this latter condition can only apply to tokens resulting from argument pre-expansion. Other tokens never have an opportunity to be re-tested for expansion. It is possible for identifiers that are function-like macros to not expand initially but to expand during a later scan. This occurs when the identifier is the last token of an argument (and therefore originally followed by a comma or a closing parenthesis in its macro’s argument list), and when it replaces its parameter in the macro’s replacement list, the subsequent token happens to be an opening parenthesis (itself possibly the first token of an argument).\newline%
-	\newline%
-	It is important to note that when cpplib reads the last token of a given context, that context still remains on the stack. Only when looking for the next token do we pop it off the stack and drop to a lower context. This makes backing up by one token easy, but more importantly ensures that the macro corresponding to the current context is still disabled when we are considering the last token of its replacement list for expansion (or indeed expanding it). As an example, which illustrates many of the points above, consider\newline%
-	\newline%
-	\tcode{\#define foo(x) bar x\newline%
-		foo(foo) (2)}\newline%
-	\newline%
-	which fully expands to \tcode{bar foo (2)}. During pre-expansion of the argument, \tcode{foo} does not expand even though the macro is enabled, since it has no following parenthesis [pre-expansion of an argument only uses tokens from that argument; it cannot take tokens from whatever follows the macro invocation]. This still leaves the argument token \tcode{foo} eligible for future expansion. Then, when re-scanning after argument replacement, the token \tcode{foo} is rejected for expansion, and marked ineligible for future expansion, since the macro is now disabled. It is disabled because the replacement list \tcode{bar foo} of the macro is still on the context stack.\newline%
-	\newline%
-	If instead the algorithm looked for an opening parenthesis first and then tested whether the macro were disabled it would be subtly wrong. In the example above, the replacement list of 'foo' would be popped in the process of finding the parenthesis, re-enabling 'foo' and expanding it a second time. }
 
 
 \pnum
@@ -1004,6 +992,18 @@ Two replacement lists are identical if and only if
 the preprocessing tokens in both have
 the same number, ordering, spelling, and whitespace separation,
 where all whitespace separations are considered identical.
+\fvmargin{The C standard states that, after any parameters have been replaced with their possibly-expanded arguments, the replacement list is scanned for nested macros. Further, any identifiers in the replacement list that are not expanded during this scan are never again eligible for expansion in the future, if the reason they were not expanded is that the macro in question was disabled.\newline%
+	\newline%
+	Clearly this latter condition can only apply to tokens resulting from argument pre-expansion. Other tokens never have an opportunity to be re-tested for expansion. It is possible for identifiers that are function-like macros to not expand initially but to expand during a later scan. This occurs when the identifier is the last token of an argument (and therefore originally followed by a comma or a closing parenthesis in its macro argument list), and when it replaces its parameter in the macro's replacement list, the subsequent token happens to be an opening parenthesis (itself possibly the first token of an argument).\newline%
+	\newline%
+	It is important to note that when cpplib reads the last token of a given context, that context still remains on the stack. Only when looking for the next token do we pop it off the stack and drop to a lower context. This makes backing up by one token easy, but more importantly ensures that the macro corresponding to the current context is still disabled when we are considering the last token of its replacement list for expansion (or indeed expanding it). As an example, which illustrates many of the points above, consider\newline%
+	\newline%
+	\tcode{\#define foo(x) bar x\newline%
+		foo(foo) (2)}\newline%
+	\newline%
+	which fully expands to \tcode{bar foo (2)}. During pre-expansion of the argument, \tcode{foo} does not expand even though the macro is enabled, since it has no following parenthesis [pre-expansion of an argument only uses tokens from that argument; it cannot take tokens from whatever follows the macro invocation]. This still leaves the argument token \tcode{foo} eligible for future expansion. Then, when re-scanning after argument replacement, the token \tcode{foo} is rejected for expansion, and marked ineligible for future expansion, since the macro is now disabled. It is disabled because the replacement list \tcode{bar foo} of the macro is still on the context stack.\newline%
+	\newline%
+	If instead the algorithm looked for an opening parenthesis first and then tested whether the macro were disabled it would be subtly wrong. In the example above, the replacement list of 'foo' would be popped in the process of finding the parenthesis, re-enabling 'foo' and expanding it a second time.}
 
 \pnum
 An identifier currently defined as an
