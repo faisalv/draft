@@ -7052,6 +7052,25 @@ before substitution of any explicitly-specified template arguments
 is checked against its corresponding argument;
 if the corresponding argument cannot be implicitly converted
 to the parameter type, type deduction fails.
+
+
+\fvmargin{
+	\label{fv:template-argument-deduction-steps-cwg2369}
+	The general order of steps for Template Argument Deduction (as re-ordered by \fvcwg{2369}) and as first suggested by Richard  \href{https://lists.isocpp.org/core/2018/10/5140.php}{(core reflector)} are \textbf{(Note: The numbers in parentheses was the order prior to cwg2369)}:
+    \newline
+	\begin{enumerate}
+		\item (1) substitute explicitly-specified template arguments throughout the	template parameter list and type;
+		\item (2) deduce template arguments from the resulting function signature;
+		\item (4) substitute deduced template arguments into the template parameter list
+		and particularly into any needed default arguments to form a complete
+		template argument list;;
+		\item (6) check that the associated constraints are satisfied;
+		\item (3) check that non-dependent parameters can be initialized from their arguments;
+		\item (5) substitute resulting template arguments throughout the type;
+		\item (7) check that remaining parameters can be initialized from their arguments.
+	\end{enumerate}	
+}
+
 \begin{note}
 Overload resolution will check the other parameters, including
 parameters with dependent types in which
