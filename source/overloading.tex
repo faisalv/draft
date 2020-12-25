@@ -15,6 +15,38 @@ which must be functions or function templates,
 is commonly called an ``overload''.
 \end{note}
 
+
+\fvmargin{Daveed's Book:\newline
+	Calls through function pointers and	calls through pointers to member functions are not subject to overload resolution	because the function to call is entirely determined (at run time) by the pointers.\newline\newline
+	At a very high level, a call to a named function can be processed in the following way:
+	\newline (\textbf{Note: Template argument deduction occurs prior to Overload Resolution})
+	\newline
+	\begin{enumerate}
+		\item The name is looked up to form an initial overload set.
+		\item If necessary, \textbf{\underline{template argument deduction}}, substitution and constraint satisfaction occurs, which can cause some function template candidates to be discarded.
+		\item Any candidate that doesn’t match the call at all (even after considering implicit
+		conversions and default arguments) is eliminated from the overload set. This
+		results in a set of viable function candidates.
+		\item \textbf{\underline{Overload resolution}} is performed to find a best candidate. If there is one, it is selected; otherwise, the call is ambiguous.
+		\begin{enumerate}
+			\item For one candidate to be considered better than another, the better candidate cannot have any of its parameters be a worse match than the corresponding parameter in the other
+			candidate
+			\item The call to combine() below is ambiguous because the first candidate
+			matches the first argument (the literal 1 of type int) best, whereas the second
+			candidate matches the second argument best. We could argue that int is in some
+			sense closer to long than to double (which supports choosing the second
+			candidate), but C++ does not attempt to define a measure of closeness that involves
+			multiple call arguments.\newline
+			\mbox{\space\space\space \tcode{void combine(int, double);}}\newline
+			\mbox{\space\space\space \tcode{void combine(long, int);}}\newline 
+			\mbox{\space\space\space \tcode{combine(1, 2);        // ambiguous!}}\newline		
+		\end{enumerate}
+		\item The selected candidate is checked. For example, if it is a deleted function (i.e., one
+		defined with = delete) or an inaccessible private member function, a diagnostic
+		is issued.
+	\end{enumerate}
+}
+
 \pnum
 When a function is named in a call, which function
 declaration is being referenced and the validity of the call
