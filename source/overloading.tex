@@ -17,16 +17,15 @@ is commonly called an ``overload''.
 
 
 \fvmargin{From Daveed's Book:\newline
-	Calls through function pointers and	calls through pointers to member functions are not subject to overload resolution	because the function to call is entirely determined (at run time) by the pointers.\newline\newline
-	At a very high level, a call to a named function can be processed in the following way:
-	\newline (Note: Template argument deduction (see steps as p\pageref{fv:template-argument-deduction-steps-cwg2369}) occurs prior to Overload Resolution)
+	Calls through \textbf{function-pointers and	pointers-to-member-functions} do not need overload resolution.\newline\newline
+	A call to a named function is broadly processed as follows:
+	\newline 
 	\newline
 	\begin{enumerate}
-		\item The name is looked up to form an initial overload set.
-		\item If necessary, for function templates \textbf{\underline{template argument deduction}}, substitution and constraint satisfaction occurs, which can cause some function template candidates to be discarded.  Additionally for function object calls - function call operators and surrogate function pointers are added.
-		\item Any candidate that doesn’t match the call (number of arguments etc.) at all (even after considering implicit conversions and default arguments) is eliminated from the overload set. This
-		results in a set of viable function candidates.
-		\item \textbf{\underline{Overload resolution}} is performed to find a best candidate. If there is one, it is selected; otherwise, the call is ambiguous.
+		\item \textbf{Lookup} is used to form an overload set.
+		\item \textbf{Template argument deduction \underline{(see steps at p\pageref{fv:template-argument-deduction-steps-cwg2369})}} can cause some templates to be discarded.  For function object calls - \textbf{function call operators and surrogate functions} (for non-template conversion functions)  are added.
+		\item \textbf{Viability} of arguments (number, implicit conversions and default argument) is used to filter out candidates.
+		\item \textbf{Overload resolution} is performed to find a best candidate. If there is one, it is selected; otherwise, the call is ambiguous.
 		\begin{enumerate}
 			\item For one candidate to be considered better than another, the better candidate cannot have any of its parameters be a worse match than the corresponding parameter in the other
 			candidate
@@ -40,9 +39,7 @@ is commonly called an ``overload''.
 			\mbox{\space\space\space \tcode{void combine(long, int);}}\newline 
 			\mbox{\space\space\space \tcode{combine(1, 2);        // ambiguous!}}\newline		
 		\end{enumerate}
-		\item The selected candidate is checked. For example, if it is a deleted function (i.e., one
-		defined with = delete) or an inaccessible private member function, a diagnostic
-		is issued.
+		\item Accessibility (i.e. private etc) and Deletion (i.e. = delete) is checked.
 	\end{enumerate}
 }
 
