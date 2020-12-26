@@ -384,6 +384,26 @@
 \newcommand{\fvcwg}[1]{\href{http://wg21.link/cwg#1}{cwg#1}}
 \newcommand{\fvgit}[1]{\href{https://github.com/cplusplus/draft/commit/#1}{git\StrLeft{#1}{5}...}}
 
+
+\makeatletter                         % override '@' security
+\let\fvfootnote\@fvundefined            % set fvfootnote to undefined
+\global\newsavebox{\@fvtempfootboxa}   % must be global, to escape tables/figures
+\newsavebox{\@fvtemplfootbox}
+\newenvironment{fvfootnote}{%
+	\unskip \footnotemark%    no space before the mark
+	\color{darkpurple}%
+	\stepcounter{fvnum}\unskip\textsuperscript{\fvid}%
+	\normalfont%
+	\footnotesize%           text size for rendering the footnote text
+	\begin{lrbox}{\@fvtemplfootbox}%       temporarily save to local box
+	}{%
+	\end{lrbox}%
+	\global\setbox\@fvtempfootboxa\hbox{\unhbox\@fvtemplfootbox}%  copy to global box
+	\footnotetext{\unhbox\@fvtempfootboxa}%
+}
+\makeatother
+
+
 %%%%%%%%%%%%%%%% END FV Annotation Macros %%%%%%%%%%%%%%%%%%%%%%%%
 
 %% Library function descriptions
