@@ -606,7 +606,7 @@ example, the lvalue-to-rvalue conversion is not done on the operand of
 the unary \tcode{\&} operator. Specific exceptions are given in the
 descriptions of those operators and contexts.
 \end{note}
-
+\fvmargin{\href{https://en.cppreference.com/w/cpp/language/implicit_conversion}{cppref} Value transformations are conversions that change the value category of an expression such as when an expression appears as an operand of an operator that expects an expression of a different value category. }
 \rSec2[conv.lval]{Lvalue-to-rvalue conversion}
 
 \pnum
@@ -630,7 +630,7 @@ In \Cpp{} class and array prvalues can have cv-qualified types.
 This differs from ISO C, in which non-lvalues never have
 cv-qualified types.
 \end{footnote}
-
+\fvmargin{This conversion models the act of reading a value from a memory location into a CPU register.}
 \pnum
 When an lvalue-to-rvalue conversion
 is applied to an expression $E$, and either
@@ -715,6 +715,10 @@ lvalue that refers to a non-static member function cannot be obtained.
 \rSec2[conv.rval]{Temporary materialization conversion}
 \indextext{conversion!temporary materialization}%
 
+\fvmargin{
+	See \fvpaper{p0135r0}\newline
+	See \fvgit{611f4c675e2160463cb1fbf71ab87bd67c9102eb}
+}
 \pnum
 A prvalue of type \tcode{T} can be converted to an xvalue of type \tcode{T}.
 This conversion initializes a temporary object\iref{class.temporary} of type \tcode{T} from the prvalue
