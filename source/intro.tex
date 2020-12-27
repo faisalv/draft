@@ -764,6 +764,35 @@ consists of all syntactic and semantic rules in this document
 except for those rules containing an explicit notation that
 ``no diagnostic is required'' or which are described as resulting in
 ``undefined behavior''.
+\begin{fvfootnote}
+	\textbf{Undefined Behavior}: UB doesn't cause issues unless a specific execution triggers it - but it reaches backwards, and could impact behavior of code that appears to be invoked before it. (likely to allow code rearrangements and optimizations):  \tcode{*p}
+	//leads to UB if p=0 \newline
+	\textbf{Ill Formed NDR (leads to UB if not diagnosed)}: IFNDR should be diagnosed during translation, but may not be able to due to various technical or theoretical limitations. E.g. the ODR would require the implementation to collect all definitions of an entity and compare them; Some NDR things are even computationally infeasible. 
+	Undefined behavior arises when the implementation doesn't immediately diagnose this stuff.
+	
+\end{fvfootnote}
+\fvmargin{
+	\textbf{\underline{UB vs IFNDR}} 	\href{https://lists.isocpp.org/ext/2018/06/4627.php}{reflector},
+	\href{https://stackoverflow.com/questions/22180312/difference-between-undefined-behavior-and-ill-formed-no-diagnostic-message-requ}{SO}
+	\href{https://en.cppreference.com/w/cpp/language/ub}{cppref}	
+	\newline\textbf{UB only affects those program executions that would execute the UB.  The rationale for choosing UB over ill-formed NDR is you get the UB only if you trigger it, as opposed to the mere presence of an ill-formed construct turning your whole program into UB if you run it, regardless of whether you trigger the side effects or not.}
+	\newline\newline
+	\textbf{Examples of UB:}\newline
+	-- signed overflow: \tcode{void f(int x) \{ return x + 1; \}}\newline
+	-- access out of bounds \newline
+	-- read an uninitialized scalar \newline
+	-- null pointer dereference \newline
+	-- access to pointer passed to realloc \newline
+	-- infinite loop without side-effects \newline
+	-- invalid scalar values assigned via reinterpret-cast\newline
+	\textbf{Examples of IFNDR:}\newline
+	-- [lex.comment] vertical-tab/ff characters in // comments followed by non-whitespace\newline
+	-- [lex.name] identifiers with __ or _[A-Z] in any scope\newline
+	-- [lex.name] identifiers with _[a-zA-Z1-0] in global scope\newline
+	-- [basic.link] two declarations of an entity attached to different module and neither is reachable from the other.\newline
+	-- [basic.link] array object declarations that differ by presence or absence of a major array bound, and neither is reachable from the other.\newline
+	-- [stmt.ambig] lookup finds name in template argument bound to part of declaration being parsed \tcode{int B(C<decltype(B)>())}%
+}
 
 \pnum
 \indextext{conformance requirements!method of description}%
