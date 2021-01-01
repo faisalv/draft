@@ -707,6 +707,7 @@ The result is a pointer to the first element of the array.
 An lvalue of function type \tcode{T} can be converted to a prvalue of
 type ``pointer to \tcode{T}''. The result is a pointer to the
 function.
+\fvmargin{\tcode{auto p = ********(void (*)())([] \{\}); }}
 \begin{footnote}
 This conversion never applies to non-static member functions because an
 lvalue that refers to a non-static member function cannot be obtained.
@@ -758,6 +759,39 @@ each $P_i$ is
 If $P_i$ designates an array,
 the cv-qualifiers $\cv{}_{i+1}$ on the element type are also taken as
 the cv-qualifiers $\cv{}_i$ of the array.
+\begin{fvfootnote}
+	\href{https://stackoverflow.com/questions/56733770/multiple-cv-decompositions-of-a-type}{SO 1}, 
+	\href{https://stackoverflow.com/questions/54886467/ambiguity-in-qualification-conversion}{SO 2}, 
+	\href{https://blog.panicsoftware.com/qualification-conversion/}{Blog Post}, \fvcwg{330}, \fvpaper{n4261}, \href{https://listarchives.isocpp.org/cgi-bin/wg21/message?wg=core&msg=26242}{cwg-reflector},
+	\href{https://listarchives.isocpp.org/cgi-bin/wg21/message?wg=core&msg=25976}{cwg-reflector},
+	\href{https://listarchives.isocpp.org/cgi-bin/wg21/message?wg=core&msg=25423}{cwg-reflector}
+	To obtain the cv-decomposition of type T1 (a type can have multiple cv-decompositions if it has multiple ptr-operators), \uline{reorder} the type so as to have each cv-qualifier be to the right of \tcode{'U'} or the corresponding '*'.  Then using the ptr-operators as separators, separate the cv-specifiers into a sequence of (cv, ptr) pairs, numbered from high to low as you move further away from \tcode{U}. As an example consider the three cv-decompositions of \tcode{int const **}\newline
+	1) n=0: \tcode{cv0=(), U=int const**} \newline
+	2) n=1: \tcode{cv0=(), P0=(*), cv1=(), U=int const*}  \newline
+	3) n=2: \tcode{cv0=(), P0=(*), cv1=(), P1=(*), cv2=(const) U=int}  \newline\newline	
+	
+	
+\end{fvfootnote}
+\fvmargin{	
+	To \textbf{convert T1 into T2}:\newline
+	1) T1 and T2 shall be \textbf{similar} (i.e. types are the same ignoring cv-qualifiers) \newline 
+	--- i.e \tcode{int**} and \tcode{int *const*} are similar.\newline 
+	2) The cv-qualifiers corresponding to each ptr-operator (numbered in \textbf{descending} order from 'U') must be the same.\newline
+	--- i.e. \tcode{int const2 *const1 *const0}\newline
+	3) As we descend from \tcode{U} if there is a 'k' where qualifiers do not match between \tcode{T1 \& T2}, then all qualifiers from k...1 in T2 must be cv-qualified (can ignore cv0 '\tcode{int i = (int const) 0; }' is OK):\newline
+	--- \tcode{struct X;}\newline
+	--- \tcode{using U = const char (X::*())[10];}\newline
+	--- \tcode{U const *const *const * p1 = (U ***const)0;}\newline
+	--- \tcode{U **const *const * p2 = (U **const **)0;}\newline
+
+	\textbf{\tcode{volatile}} must match exactly if in T1 - except for cv0\newline\newline
+	\textbf{\tcode{const}} must be added for every lower cvK except cv0:\newline
+	
+	--- \tcode{int volatile *const *pi = (int**)0;}\newline
+	--- \tcode{int ** volatile *const *pi2 = \newline (int **volatile **)0;}\newline
+	
+}
+
 \begin{example}
 The type denoted by the \grammarterm{type-id} \tcode{const int **}
 has three cv-decompositions,
@@ -770,22 +804,6 @@ The $n$-tuple of cv-qualifiers after the first one
 in the longest cv-decomposition of \tcode{T}, that is,
 $\cv{}_1, \cv{}_2, \dotsc, \cv{}_n$, is called the
 \defn{cv-qualification signature} of \tcode{T}.
-\fvmargin{
-	To perform the cv-decomposition, you have to \uline{reorder} the structure of the type declaration and decompose it into a tuple.  As an example consider: \newline
-	\tcode{\newline
-				struct X;\newline
-				const double *volatile X::*const volatile A[10] \newline
-				\newline
-				(CV0 = 'const volatile' P0 = 'array of 10') \newline
-				(CV1 = 'const volatile' P1 = 'X::*')\newline
-				(CV2 = 'volatile' P2 = '*') \newline
-				(CV3 = 'const') U = 'double'}   \newline
-	    \fvcwg{330}\newline
-		Jens' paper (\fvpaper{n4261})\newline
-		\href{https://listarchives.isocpp.org/cgi-bin/wg21/message?wg=core&msg=26242}{old-cwg-reflector-26242 discussion}\newline
-		\href{https://listarchives.isocpp.org/cgi-bin/wg21/message?wg=core&msg=25976}{old-cwg-reflector-25976 discussion}\newline
-		\href{https://listarchives.isocpp.org/cgi-bin/wg21/message?wg=core&msg=25423}{old-cwg-reflector-25423 discussion}\newline
-}
 
 \pnum
 \indextext{type!similar|see{similar types}}%
