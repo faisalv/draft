@@ -766,30 +766,29 @@ the cv-qualifiers $\cv{}_i$ of the array.
 	\href{https://listarchives.isocpp.org/cgi-bin/wg21/message?wg=core&msg=25976}{cwg-reflector},
 	\href{https://listarchives.isocpp.org/cgi-bin/wg21/message?wg=core&msg=25423}{cwg-reflector}
 	To obtain the cv-decomposition of type T1 (a type can have multiple cv-decompositions if it has multiple ptr-operators), \uline{reorder} the type so as to have each cv-qualifier be to the right of \tcode{'U'} or the corresponding '*'.  Then using the ptr-operators as separators, separate the cv-specifiers into a sequence of (cv, ptr) pairs, numbered from high to low as you move further away from \tcode{U}. As an example consider the three cv-decompositions of \tcode{int const **}\newline
-	1) n=0: \tcode{cv0=(), U=int const**} \newline
-	2) n=1: \tcode{cv0=(), P0=(*), cv1=(), U=int const*}  \newline
-	3) n=2: \tcode{cv0=(), P0=(*), cv1=(), P1=(*), cv2=(const) U=int}  \newline\newline	
-	
-	
+	\fvfootnotespace{----}1) \tcode{U=int const** cv0=()} N=0\newline
+	\fvfootnotespace{----}2) \tcode{U=int const*\fvfootnotespace{*}  cv0=(), P0=(*), cv1=()} N=1  \newline
+	\fvfootnotespace{----}3) \tcode{U=int \fvfootnotespace{const**}  cv0=(), P0=(*), cv1=(), P1=(*), cv2=(const) }  N=2 : \tcode{int const2 **}\newline\newline	
+    Examples:\newline
+	\fvfootnotespace{----}\tcode{const int *const (X::*const *const X::*pmi)[]  = (int* (X::** X::*)[10]) 0;}\newline
+	\fvfootnotespace{----}\tcode{int *(X::*const *const X::*pmi2)[]  = (int* (X::** X::*)[10]) 0;}\newline
+	\fvfootnotespace{----}\tcode{int volatile *const *pi = (int**)0;}\newline
+	\fvfootnotespace{----}\tcode{int **volatile *const *pi2 = (int **volatile **)0;}\newline	
 \end{fvfootnote}
 \fvmargin{	
 	To \textbf{convert T1 into T2}:\newline
 	1) T1 and T2 shall be \textbf{similar} (i.e. types are the same ignoring cv-qualifiers) \newline 
-	--- i.e \tcode{int**} and \tcode{int *const*} are similar.\newline 
-	2) The cv-qualifiers corresponding to each ptr-operator (numbered in \textbf{descending} order from 'U') must be the same.\newline
-	--- i.e. \tcode{int const2 *const1 *const0}\newline
+	\fvmarginspace{---} i.e \tcode{int**} and \tcode{int *const*} are similar.\newline 
+	2) The cv-qualifiers corresponding to each ptr-operator (numbered in \textbf{descending} order from 'U') must be the same.\newline 
+	\fvmarginspace{---} i.e. \tcode{int const2 *const1 *const0}\newline
 	3) As we descend from \tcode{U} if there is a 'k' where qualifiers do not match between \tcode{T1 \& T2}, then all qualifiers from k...1 in T2 must be cv-qualified (can ignore cv0 '\tcode{int i = (int const) 0; }' is OK):\newline
-	--- \tcode{struct X;}\newline
-	--- \tcode{using U = const char (X::*())[10];}\newline
-	--- \tcode{U const *const *const * p1 = (U ***const)0;}\newline
-	--- \tcode{U **const *const * p2 = (U **const **)0;}\newline
+	\fvmarginspace{---}\tcode{struct X;}\newline
+	\fvmarginspace{---}\tcode{using U = const char (X::*())[10];}\newline
+	\fvmarginspace{---}\tcode{U const *const *const * p1 = (U ***const)0;}\newline
+	\fvmarginspace{---}\tcode{U **const *const * p2 = (U **const **)0;}\newline
 
 	\textbf{\tcode{volatile}} must match exactly if in T1 - except for cv0\newline\newline
 	\textbf{\tcode{const}} must be added for every lower cvK except cv0:\newline
-	
-	--- \tcode{int volatile *const *pi = (int**)0;}\newline
-	--- \tcode{int ** volatile *const *pi2 = \newline (int **volatile **)0;}\newline
-	
 }
 
 \begin{example}
