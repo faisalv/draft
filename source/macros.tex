@@ -358,6 +358,7 @@
 		\color{black}%
 	}%
 }
+\newcommand{\fvmarginspace}[1] {\color{white} #1 \color{blue}}
 
 
 %\newcommand{\addfv}[1]{\stepcounter{fvnum}\color{darkpurple}#1\fvid\color{black}}
@@ -403,7 +404,15 @@
 }
 \makeatother
 
+\newcommand{\fvfootnotespace}[1] {\color{white} #1 \color{darkpurple}}
 
+% save/restore current color: https://tex.stackexchange.com/questions/199688/how-to-change-the-colour-back-to-the-original-following-color
+\makeatletter
+\def\fvsavecolor{\edef\fvrestorecolor{\pdfliteral{\current@color}}}%pdftex version
+\makeatother
+
+%for placing spaces we change the color to white and insert the chracters.
+\newcommand{\fvspace}[1] {\fvsavecolor \color{white} #1 \fvrestorecolor}
 %%%%%%%%%%%%%%%% END FV Annotation Macros %%%%%%%%%%%%%%%%%%%%%%%%
 
 %% Library function descriptions
