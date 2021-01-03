@@ -580,6 +580,15 @@ whose return type is \cv{} \tcode{T} or reference to \cv{}
 \tcode{T} such that \tcode{T} is allowed by the context.
 There shall be exactly one such \tcode{T}.
 
+\fvmargin{ See Walter's Paper regarding contextual implict conversions: \fvpaper{n3323}\newline
+	\fvmarginspace{--}--- delete operand: \newline
+	\fvmarginspace{--------} class => pointer to object\newline
+	\fvmarginspace{--}--- constant-expression: \newline
+	\fvmarginspace{--------}literal class => integral or unscoped enum\newline
+	\fvmarginspace{--}--- switch condition: \newline
+	\fvmarginspace{--------}class => integral or enum\newline
+}
+
 \pnum
 The effect of any implicit
 conversion is the same as performing the corresponding declaration and initialization
