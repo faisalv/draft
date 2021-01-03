@@ -5484,6 +5484,13 @@ element of the array created by that \grammarterm{new-expression}.
 Zero-length arrays do not have a first element.
 \end{footnote}
 If not, the behavior is undefined.
+
+\fvmargin{\newline
+\tcode{
+  \fvmarginspace{--} struct A \{ operator int*() \{ return 0; \} \};\newline
+  \fvmarginspace{--} delete A(); } // OK!\newline
+}
+
 \begin{note}
 This means that the syntax of the \grammarterm{delete-expression} must
 match the type of the object allocated by \tcode{new}, not the syntax of the
