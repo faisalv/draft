@@ -5921,6 +5921,15 @@ The operands of \tcode{*} and \tcode{/} shall have arithmetic or unscoped
 enumeration type; the operands of \tcode{\%} shall have integral or unscoped
 enumeration type. The usual arithmetic conversions\iref{expr.arith.conv} are performed on the
 operands and determine the type of the result.
+\fvmargin{
+Computing modulus for powers of two  is much more efficient with bit-arithmetic on a binary computer. The term \tcode{(a \% m)} is zero, so we just take the modulus by examining the least significant bits of the binary representation:\newline\newline 
+\tcode{\fvmarginspace{--} a \% 2\textsuperscript{i} = a \& (2\textsuperscript{i} – 1)\newline	
+\fvmarginspace{--} a \% 2 => a \& 1\newline
+\fvmarginspace{--} a \% 4 => a \& 3\newline
+\fvmarginspace{--} a \% 8 => a \& 7\newline}\newline
+\href{http://homepage.cs.uiowa.edu/~jones/bcd/mod.shtml}{Modulo sans division}, \href{https://stackoverflow.com/questions/3072665/bitwise-and-in-place-of-modulus-operator}{SO bitwise in-place of mod}
+}
+
 
 \pnum
 The binary \tcode{*} operator indicates multiplication.
