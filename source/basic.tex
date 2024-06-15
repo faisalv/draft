@@ -852,6 +852,18 @@ those unnamed enumeration types shall be the same; no diagnostic required.
 
 \rSec2[basic.scope.scope]{General}
 
+\fvmargin{\fvpaper{p1787}
+	Davis's omnibus paper re-engineered name lookup wording by addressing the following general issues: \newline
+	
+	[basic.scope] defined the word “scope” in two different ways, and then implicitly and indirectly specified many aspects of name lookup with imperfect correspondence to the descriptions in [basic.lookup]. Lookup was often described for units of program text that might include multiple names and < tokens that must be disambiguated, such as a template-id ([temp.dep]/2), id-expression ([over.call.func]/2), or conversion-type-id ([class.qual]/1.2). Namespaces, and the global namespace in particular, were inconsistently described as being one or many declarative regions ([basic.scope.namespace]/1, /4).\newline\newline
+	
+	Modules significantly complicated the situation, principally by invalidating the tacit assumption that “every” lookup is restricted to preceding declarations in the same translation unit. There were already exceptions to that rule (e.g., complete class contexts and using-declaration conflicts), which could then easily be (mis)read as applying to all contents of all translation units. Many rules, like those for lookup through a using-directive, did not make any mention of location at all, and so became  ambiguous.\newline\newline
+	
+	The similar process of associating a declaration with a previous declaration of the same name was also poorly specified. In particular, there was no consistent rule as to whether multiple declarations of the same name introduced distinct entities (that might conflict) or one entity (and might conflict).\newline\newline
+	
+	
+}
+
 \pnum
 The declarations in a program appear in a number of \defnx{scopes}{scope}
 that are in general discontiguous.
